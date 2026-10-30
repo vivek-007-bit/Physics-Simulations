@@ -1,0 +1,145 @@
+:root, [data-theme="dark"] {
+  /* Color Palette - Modern Physics Laboratory Dark Theme (Original Default) */
+  --bg-primary: #0b0f19;
+  --bg-secondary: #111827;
+  --bg-tertiary: #1a2234;
+  --bg-elevated: #1e293b;
+  --bg-glass: rgba(17, 24, 39, 0.75);
+  --bg-glass-card: rgba(22, 31, 48, 0.65);
+  --bg-glass-hover: rgba(30, 41, 59, 0.85);
+
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-medium: rgba(255, 255, 255, 0.15);
+  --border-focus: #6366f1;
+
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-inverse: #0b0f19;
+
+  /* Accent Colors */
+  --accent-cyan: #06b6d4;
+  --accent-cyan-glow: rgba(6, 182, 212, 0.25);
+  --accent-indigo: #6366f1;
+  --accent-indigo-glow: rgba(99, 102, 241, 0.25);
+  --accent-emerald: #10b981;
+  --accent-emerald-glow: rgba(16, 185, 129, 0.25);
+  --accent-amber: #f59e0b;
+  --accent-amber-glow: rgba(245, 158, 11, 0.25);
+  --accent-rose: #f43f5e;
+  --accent-rose-glow: rgba(244, 63, 94, 0.25);
+  --accent-purple: #a855f7;
+
+  /* Background Glow Radials */
+  --bg-radial-1: rgba(99, 102, 241, 0.15);
+  --bg-radial-2: rgba(6, 182, 212, 0.08);
+  --hero-glow-1: rgba(99, 102, 241, 0.22);
+  --hero-glow-2: rgba(6, 182, 212, 0.12);
+
+  /* Elevation & Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 25px rgba(99, 102, 241, 0.2);
+  --shadow-cyan-glow: 0 0 20px rgba(6, 182, 212, 0.25);
+
+  /* Simulation Canvas Colors */
+  --canvas-bg-start: #0c111d;
+  --canvas-bg-end: #090d16;
+  --canvas-grid: rgba(255, 255, 255, 0.05);
+  --canvas-grid-text: rgba(148, 163, 184, 0.6);
+  --canvas-ground-line: #334155;
+  --canvas-ground-fill: #0f172a;
+  --canvas-cliff-body: #1e293b;
+  --canvas-cliff-border: #475569;
+  --canvas-barrel-body: #475569;
+  --canvas-barrel-border: #94a3b8;
+  --canvas-pivot: #334155;
+  --canvas-trajectory: rgba(99, 102, 241, 0.35);
+  --canvas-apex-line: rgba(168, 85, 247, 0.4);
+  --canvas-apex-text: #c084fc;
+  --canvas-range-text: #34d399;
+}
+
+[data-theme="light"] {
+  /* Color Palette - Modern Physics Laboratory Light Theme */
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f1f5f9;
+  --bg-elevated: #e2e8f0;
+  --bg-glass: rgba(255, 255, 255, 0.85);
+  --bg-glass-card: rgba(255, 255, 255, 0.88);
+  --bg-glass-hover: rgba(241, 245, 249, 0.95);
+
+  --border-subtle: rgba(15, 23, 42, 0.08);
+  --border-medium: rgba(15, 23, 42, 0.14);
+  --border-focus: #4f46e5;
+
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+  --text-inverse: #ffffff;
+
+  /* Accent Colors adapted for light mode readability */
+  --accent-cyan: #0284c7;
+  --accent-cyan-glow: rgba(2, 132, 199, 0.18);
+  --accent-indigo: #4f46e5;
+  --accent-indigo-glow: rgba(79, 70, 229, 0.18);
+  --accent-emerald: #059669;
+  --accent-emerald-glow: rgba(5, 150, 105, 0.18);
+  --accent-amber: #d97706;
+  --accent-amber-glow: rgba(217, 119, 6, 0.18);
+  --accent-rose: #e11d48;
+  --accent-rose-glow: rgba(225, 29, 72, 0.18);
+  --accent-purple: #7c3aed;
+
+  /* Background Glow Radials */
+  --bg-radial-1: rgba(99, 102, 241, 0.06);
+  --bg-radial-2: rgba(6, 182, 212, 0.05);
+  --hero-glow-1: rgba(99, 102, 241, 0.12);
+  --hero-glow-2: rgba(6, 182, 212, 0.08);
+
+  /* Elevation & Shadows */
+  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 4px 16px rgba(15, 23, 42, 0.07);
+  --shadow-lg: 0 10px 28px rgba(15, 23, 42, 0.1);
+  --shadow-glow: 0 0 25px rgba(79, 70, 229, 0.12);
+  --shadow-cyan-glow: 0 0 20px rgba(2, 132, 199, 0.15);
+
+  /* Simulation Canvas Colors */
+  --canvas-bg-start: #ffffff;
+  --canvas-bg-end: #f8fafc;
+  --canvas-grid: rgba(0, 0, 0, 0.06);
+  --canvas-grid-text: #64748b;
+  --canvas-ground-line: #94a3b8;
+  --canvas-ground-fill: #e2e8f0;
+  --canvas-cliff-body: #f1f5f9;
+  --canvas-cliff-border: #94a3b8;
+  --canvas-barrel-body: #334155;
+  --canvas-barrel-border: #1e293b;
+  --canvas-pivot: #475569;
+  --canvas-trajectory: rgba(79, 70, 229, 0.55);
+  --canvas-apex-line: rgba(124, 58, 237, 0.45);
+  --canvas-apex-text: #7c3aed;
+  --canvas-range-text: #059669;
+}
+
+:root {
+  /* Fonts */
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-heading: 'Plus Jakarta Sans', var(--font-sans);
+  --font-mono: 'Fira Code', 'JetBrains Mono', Consolas, monospace;
+
+  /* Layout */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 22px;
+  --radius-full: 9999px;
+
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth: 350ms cubic-bezier(0.16, 1, 0.3, 1);
+
+  --max-width: 1320px;
+}
