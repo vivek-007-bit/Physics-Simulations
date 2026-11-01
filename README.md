@@ -1,24 +1,7 @@
 # Interactive Physics Simulation Laboratory
 
-A modern, high-performance, browser-based physics simulation laboratory built strictly with **React 18** and **Vite** on the frontend—**zero backend, zero database, zero server-side dependencies**.
+A modern, high-performance, browser-based physics simulation laboratory built with **React 18** and **Vite**.
 
----
-
-## Table of Contents
-
-1. [Project Overview](#project-overview)
-2. [Key Highlights & Technology Stack](#key-highlights--technology-stack)
-3. [Global Dark & Light Theme Architecture](#global-dark--light-theme-architecture)
-4. [Project Architecture](#project-architecture)
-5. [Automatic Simulation Discovery Engine](#automatic-simulation-discovery-engine)
-6. [How to Add a New Simulation](#how-to-add-a-new-simulation)
-7. [Flagship Simulation: Projectile Motion](#flagship-simulation-projectile-motion)
-8. [Extensibility Verification: Simple Pendulum](#extensibility-verification-simple-pendulum)
-9. [Installation & Setup](#installation--setup)
-10. [Running the Application](#running-the-application)
-11. [Building for Production & Deployment](#building-for-production--deployment)
-
----
 
 ## 1. Project Overview
 
@@ -45,19 +28,6 @@ The laboratory includes:
 | **Typography & Styling** | Modern CSS Architecture | Glassmorphic laboratory UI with custom design tokens |
 | **Icons** | Custom Lightweight SVG | Zero external runtime dependencies |
 | **Physics Calculations** | Pure SI Analytical & Numerical | Decoupled, testable mathematical engines |
-
----
-
-## 3. Global Dark & Light Theme Architecture
-
-The laboratory features a centralized theme engine in [`src/context/ThemeContext.jsx`](file:///C:/Users/Acer/Documents/Vivek/Physics%20Simulations/src/context/ThemeContext.jsx) combined with comprehensive CSS design tokens in [`src/styles/variables.css`](file:///C:/Users/Acer/Documents/Vivek/Physics%20Simulations/src/styles/variables.css):
-
-### Key Specifications:
-1. **Dark Mode Baseline (Default)**: First-time visitors are strictly served the original dark theme. The layout, deep slate backgrounds, glassmorphic cards, telemetry glows, and canvas visuals remain 100% faithful to the original design.
-2. **Light Mode**: Engineered specifically for educational clarity—using clean off-white backgrounds (`#f8fafc`), crisp white cards with soft elevation shadows, and adjusted accent contrasts (`#0284c7`, `#4f46e5`, `#059669`).
-3. **Instant Toggle Without Refresh**: The top navigation bar includes an accessible Sun/Moon toggle button that seamlessly transitions the theme across all components and canvas visualizers.
-4. **Persistent Preference**: The user's selection is saved under `'physics_lab_theme'` in browser `localStorage`, surviving page refreshes, internal route transitions, and visits back to the home directory.
-5. **Theme-Aware Simulation Canvas**: HTML5 Canvas render routines directly listen to the active theme. When switching between light and dark modes, grid lines, ground planes, launcher hardware, vector arrows, markers, and particle glows adapt immediately without stopping or disrupting active animations.
 
 ---
 
@@ -180,101 +150,4 @@ Adding a future simulation requires **zero modifications** to `App.jsx`, `Home.j
    - The landing page immediately shows the new simulation card with your tags, difficulty badge, and preview.
    - The route `/simulations/newtons-second-law` immediately loads your new component.
 
----
 
-## 6. Flagship Simulation: Projectile Motion
-
-Located in `src/simulations/projectile-motion/`, this module completely replaces and elevates the original reference implementation.
-
-### Features & Physics Rigor:
-- **Real-Time 2D Parabolic Motion**:
-  - Horizontal position: $x(t) = v_{0x} t$
-  - Vertical position: $y(t) = h_0 + v_{0y} t - \frac{1}{2} g t^2$
-  - Analytical landing time calculated via the quadratic equation for non-zero launch heights ($h_0 \ge 0$):
-    $$t_{\text{flight}} = \frac{v_{0y} + \sqrt{v_{0y}^2 + 2 g h_0}}{g}$$
-  - Impact velocity and angle strictly matching conservation of mechanical energy:
-    $$v_{\text{impact}} = \sqrt{v_0^2 + 2 g h_0}$$
-- **Interactive Visualizer**:
-  - High-DPI canvas coordinate projection with dynamic world-to-screen auto-scaling.
-  - Animated glowing projectile with real-time motion trail.
-  - Dynamic launcher barrel showing launch angle arc ($\theta$).
-  - Elevated cliff / platform rendering for $h_0 > 0$.
-  - Toggable velocity vector $\vec{v}$ and component vectors $\vec{v}_x$ and $\vec{v}_y$.
-  - Theoretical trajectory guide, apex height indicator, and ground range dimension line.
-- **Controls & Telemetry**:
-  - Sliders and synchronized numerical inputs for velocity ($v_0$), angle ($\theta$), gravity ($g$), and height ($h_0$).
-  - One-click planetary presets: **Earth (9.81 m/s²)**, **Moon (1.62 m/s²)**, **Mars (3.71 m/s²)**, and **Jupiter (24.79 m/s²)**.
-  - Scenario presets (Classic 45°, High Angle 70°, Cliff Launch, Horizontal Fire, Lunar Gravity).
-  - Play, Pause, Resume, Reset, and variable speed multipliers ($0.25\times, 0.5\times, 1\times, 2\times$).
-  - Live 60 FPS HUD telemetry for $t$, $x$, $y$, $|v|$, $v_x$, and $v_y$ without causing React re-renders.
-
----
-
-## 7. Extensibility Verification: Simple Pendulum
-
-To demonstrate that the automatic discovery system functions without manual registration, the project includes `src/simulations/simple-pendulum/`:
-- **Harmonic Oscillation & Non-Linear Mechanics**:
-  - Integrated via the energy-conserving Euler-Cromer algorithm with sub-stepping:
-    $$\alpha = -\frac{g}{L} \sin(\theta) - b \omega$$
-  - Real-time decomposition of Kinetic Energy ($E_k = \frac{1}{2} m v^2$), Gravitational Potential Energy ($E_p = m g h$), and Total Mechanical Energy ($E_{\text{total}}$).
-  - Interactive adjustment of cord length ($L$), initial angle ($\theta_0$), damping coefficient ($b$), mass ($m$), and gravity ($g$).
-
----
-
-## 8. Installation & Setup
-
-### Prerequisites
-- [Node.js](https://nodejs.org/) (v18.0.0 or higher recommended; tested on v24.21.0)
-- npm (v9.0.0 or higher; tested on v11.19.0)
-
-### Installation
-Clone or navigate to the project directory:
-```bash
-cd "c:\Users\Acer\Documents\Vivek\Physics Simulations"
-```
-
-Install dependencies:
-```bash
-npm install
-```
-
----
-
-## 9. Running the Application
-
-### Development Server
-Start the local development server with Vite Hot Module Replacement (HMR):
-```bash
-npm run dev
-```
-Open your browser and navigate to:
-```
-http://localhost:3000
-```
-
-### Running Automated Physics Tests
-To verify all analytical physics equations, quadratic derivations, and vector math:
-```bash
-npm test
-```
-
----
-
-## 10. Building for Production & Deployment
-
-### Compile Static Distribution
-Build the optimized static assets into the `dist/` directory:
-```bash
-npm run build
-```
-
-### Preview Production Build Locally
-```bash
-npm run preview
-```
-
-### Static Platform Deployment
-Because this application is 100% client-side with zero backend dependencies, the output `dist/` folder can be deployed instantly to:
-- **Vercel**: `vercel deploy`
-- **Netlify**: `netlify deploy --dir=dist --prod`
-- **GitHub Pages**: Upload `dist/` to your `gh-pages` branch.
