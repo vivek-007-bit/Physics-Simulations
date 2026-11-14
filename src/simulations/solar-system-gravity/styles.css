@@ -1,0 +1,1543 @@
+.solar-system-root {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Workspace Tabs */
+.workspace-tabs {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.tab-btn:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.tab-btn.active {
+  background: var(--accent-subtle);
+  border-color: var(--accent-color);
+  color: var(--accent-color);
+  font-weight: 600;
+}
+
+/* Solar Grid */
+.solar-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 350px;
+  gap: 1.5rem;
+  align-items: start;
+  width: 100%;
+}
+
+/* Canvas & 3D Viewport Wrapper */
+.solar-canvas-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+}
+
+/* ==========================================================================
+   Three.js 3D Solar System Viewport
+   - Large Immersive Viewport Layout:
+     Desktop: ~750-850px height
+     Laptop: ~650-750px
+     Tablet: ~550-650px
+     Mobile: ~450-550px
+   ========================================================================== */
+.solar-3d-viewport {
+  position: relative;
+  width: 100%;
+  height: clamp(750px, 80vh, 850px);
+  min-height: 750px;
+  background: #030712;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  cursor: grab;
+  user-select: none;
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.15);
+}
+
+.solar-3d-viewport:active {
+  cursor: grabbing;
+}
+
+.solar-3d-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Floating Viewport Controls */
+.viewport-overlay-controls {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  z-index: 10;
+  flex-wrap: wrap;
+}
+
+.view-mode-group,
+.camera-tracking-group {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: rgba(15, 23, 42, 0.82);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: var(--radius-md);
+  padding: 0.25rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="light"] .view-mode-group,
+[data-theme="light"] .camera-tracking-group {
+  background: rgba(255, 255, 255, 0.92);
+  border-color: rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.view-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #cbd5e1;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+[data-theme="light"] .view-btn {
+  color: #334155;
+}
+
+.view-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+[data-theme="light"] .view-btn:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: #0f172a;
+}
+
+.view-btn.active {
+  background: var(--accent-color, #0284c7);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.view-btn.tracking {
+  background: #059669;
+  border-color: #10b981;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.view-btn.icon-only {
+  padding: 0.35rem 0.45rem;
+}
+
+/* Real-Time Planet Information Overlay (HUD) */
+.planet-hud-card {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  width: 290px;
+  background: rgba(15, 23, 42, 0.84);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: var(--radius-lg);
+  padding: 0.85rem 1rem;
+  z-index: 10;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  transition: all var(--transition-normal);
+}
+
+[data-theme="light"] .planet-hud-card {
+  background: rgba(255, 255, 255, 0.94);
+  border-color: rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.planet-hud-card.collapsed {
+  padding-bottom: 0.75rem;
+}
+
+.hud-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hud-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hud-color-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.3);
+}
+
+.hud-title-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.hud-planet-name {
+  font-size: 0.98rem;
+  font-weight: 700;
+  margin: 0;
+  color: #f8fafc;
+  line-height: 1.2;
+}
+
+[data-theme="light"] .hud-planet-name {
+  color: #0f172a;
+}
+
+.hud-planet-type {
+  font-size: 0.72rem;
+  color: #94a3b8;
+}
+
+[data-theme="light"] .hud-planet-type {
+  color: #64748b;
+}
+
+.hud-collapse-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.hud-collapse-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="light"] .hud-collapse-btn:hover {
+  color: #0f172a;
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.hud-metrics-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="light"] .hud-metrics-grid {
+  border-top-color: rgba(0, 0, 0, 0.08);
+}
+
+.hud-metric-item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  font-size: 0.78rem;
+}
+
+.hud-metric-label {
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+[data-theme="light"] .hud-metric-label {
+  color: #64748b;
+}
+
+.hud-metric-val {
+  color: #f1f5f9;
+  font-weight: 600;
+  text-align: right;
+}
+
+[data-theme="light"] .hud-metric-val {
+  color: #0f172a;
+}
+
+.hud-metric-val.highlight {
+  color: #38bdf8;
+}
+
+[data-theme="light"] .hud-metric-val.highlight {
+  color: #0284c7;
+}
+
+.hud-subval {
+  font-size: 0.7rem;
+  color: #64748b;
+  margin-left: 0.3rem;
+}
+
+/* Floating Projected Planet Name Labels */
+.projected-labels-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.projected-planet-label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.55rem;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+  color: #f1f5f9;
+  font-size: 0.72rem;
+  font-weight: 600;
+  pointer-events: auto;
+  cursor: pointer;
+  white-space: nowrap;
+  transform-origin: center;
+  transition: transform var(--transition-fast), background-color var(--transition-fast);
+}
+
+[data-theme="light"] .projected-planet-label {
+  background: rgba(255, 255, 255, 0.88);
+  border-color: rgba(0, 0, 0, 0.15);
+  color: #1e293b;
+}
+
+.projected-planet-label:hover {
+  background: rgba(15, 23, 42, 0.95);
+  transform: scale(1.08);
+}
+
+[data-theme="light"] .projected-planet-label:hover {
+  background: #ffffff;
+}
+
+.projected-planet-label.selected {
+  border-color: #38bdf8;
+  background: rgba(2, 132, 199, 0.45);
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+}
+
+.label-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+/* Viewport Bottom Hint Banner */
+.viewport-hint-pill {
+  position: absolute;
+  bottom: 0.85rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #94a3b8;
+  font-size: 0.73rem;
+  padding: 0.35rem 0.95rem;
+  border-radius: 9999px;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 10;
+}
+
+[data-theme="light"] .viewport-hint-pill {
+  background: rgba(255, 255, 255, 0.88);
+  border-color: rgba(0, 0, 0, 0.12);
+  color: #475569;
+}
+
+.scale-legend-info {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+}
+
+.legend-tag {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.legend-desc {
+  color: var(--text-secondary);
+}
+
+.engine-toggle-group {
+  margin-left: auto;
+}
+
+/* Solar Toolbar */
+.solar-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 0.65rem 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.toolbar-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  margin-right: 0.25rem;
+}
+
+.chip-btn {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-weight: 500;
+  transition: all var(--transition-fast);
+}
+
+.chip-btn:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.chip-btn.active {
+  background: var(--accent-color);
+  border-color: var(--accent-color);
+  color: #ffffff;
+}
+
+.toggle-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  user-select: none;
+}
+
+.toggle-label input[type="checkbox"] {
+  accent-color: var(--accent-color);
+  cursor: pointer;
+}
+
+.zoom-group {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.icon-tool-btn {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.icon-tool-btn:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+/* Canvas Box */
+.solar-canvas-box {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  background: var(--canvas-bg);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  cursor: grab;
+  box-shadow: var(--shadow-sm);
+}
+
+.solar-canvas-box:active {
+  cursor: grabbing;
+}
+
+.physics-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.canvas-hint {
+  position: absolute;
+  bottom: 0.75rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  padding: 0.3rem 0.85rem;
+  border-radius: 9999px;
+  pointer-events: none;
+  box-shadow: var(--shadow-sm);
+  white-space: nowrap;
+}
+
+/* Secondary Toggles Bar */
+.secondary-toggles-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 0.6rem 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.vector-scale-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.scale-label {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.range-slider.mini {
+  width: 80px;
+}
+
+.scale-val {
+  font-size: 0.78rem;
+  color: var(--accent-color);
+}
+
+/* Telemetry Bar */
+.solar-telemetry-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.tel-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.tel-stat-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.tel-stat-val {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Planet Selector Strip */
+.planet-selector-strip {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  flex-wrap: wrap;
+}
+
+.strip-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.strip-pills {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.planet-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 9999px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.planet-pill:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.planet-pill.active {
+  background: var(--bg-elevated);
+  border-color: var(--accent-color);
+  color: var(--text-primary);
+  font-weight: 600;
+  box-shadow: 0 0 0 1px var(--accent-color);
+}
+
+.pill-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Sidebar */
+.solar-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.sidebar-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.card-header h3 {
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.card-subtitle {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.action-button-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.primary-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: var(--accent-color);
+  color: #ffffff;
+  border: none;
+  padding: 0.6rem 0.85rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.primary-btn:hover {
+  background: var(--accent-hover);
+}
+
+.secondary-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  padding: 0.6rem 0.85rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.secondary-btn:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.control-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.control-field label {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.field-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.field-value {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--accent-color);
+}
+
+.range-slider {
+  width: 100%;
+  accent-color: var(--accent-color);
+  cursor: pointer;
+}
+
+.field-hint {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.speed-pills,
+.gravity-presets-row,
+.param-pills-row {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.orbital-velocity-presets {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 0.4rem;
+}
+
+.preset-title {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.preset-buttons-grid {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.reset-params-btn {
+  background: none;
+  border: 1px dashed var(--border-subtle);
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  padding: 0.5rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  margin-top: 0.25rem;
+}
+
+.reset-params-btn:hover {
+  border-color: var(--text-secondary);
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+}
+
+/* Planet Info Card */
+.planet-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.planet-title-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.planet-color-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.planet-type-tag {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-sm);
+  background: var(--bg-secondary);
+  color: var(--text-muted);
+  border: 1px solid var(--border-subtle);
+}
+
+.planet-metrics-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 0.75rem;
+}
+
+.metric-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.82rem;
+}
+
+.metric-row span {
+  color: var(--text-secondary);
+}
+
+.metric-row strong {
+  color: var(--text-primary);
+  font-size: 0.82rem;
+}
+
+.metric-row strong.highlight {
+  color: var(--accent-cyan);
+}
+
+/* Two-Body Mutual Force Card */
+.two-body-force-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.force-selectors-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  padding: 1rem;
+  border-radius: var(--radius-sm);
+  flex-wrap: wrap;
+}
+
+.selector-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
+}
+
+.selector-field label {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.body-dropdown {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  padding: 0.5rem 0.65rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.mutual-force-badge {
+  font-size: 0.78rem;
+  color: var(--accent-color);
+  font-weight: 600;
+  text-align: center;
+}
+
+.force-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.force-stat-box {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.force-stat-box.highlight {
+  border-color: var(--accent-color);
+  background: var(--bg-elevated);
+}
+
+.stat-title {
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.stat-val {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.stat-sub {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+}
+
+.force-explanation-note {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  background: var(--bg-secondary);
+  border-left: 3px solid var(--accent-color);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+}
+
+/* Graphs Tab View */
+.graphs-tab-view {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.graphs-top-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--radius-md);
+  flex-wrap: wrap;
+}
+
+.graphs-select-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.graphs-hint-text {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+/* Live Physics Graphs Component */
+.graph-container-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.graph-container-card.empty {
+  padding: 2.5rem;
+  text-align: center;
+}
+
+.graph-empty-msg {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.graph-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 0.75rem;
+}
+
+.graph-title-group h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.2rem 0;
+}
+
+.graph-subtitle {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.graph-metric-tabs {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.metric-tab-btn {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.metric-tab-btn:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.metric-tab-btn.active {
+  background: var(--accent-color);
+  border-color: var(--accent-color);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.graph-svg-wrapper {
+  width: 100%;
+  aspect-ratio: 16 / 6;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.telemetry-chart-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.graph-footer-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.energy-legend-row {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+}
+
+.legend-line {
+  width: 16px;
+  height: 3px;
+  border-radius: 2px;
+  display: inline-block;
+}
+
+.legend-line.dashed {
+  background: repeating-linear-gradient(
+    90deg,
+    #06b6d4,
+    #06b6d4 4px,
+    transparent 4px,
+    transparent 7px
+  );
+}
+
+.energy-drift-badge {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.energy-drift-badge strong {
+  color: var(--accent-color);
+}
+
+.single-legend-row {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  color: var(--text-muted);
+}
+
+/* Mechanics Info Card */
+.mechanics-info-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.comparison-table th {
+  text-align: left;
+  padding: 0.5rem 0.6rem;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 0.74rem;
+  text-transform: uppercase;
+}
+
+.comparison-table td {
+  padding: 0.65rem 0.6rem;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+}
+
+.status-badge {
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-badge.bound {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+}
+
+.status-badge.escape {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.mechanics-notes {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  background: var(--bg-secondary);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-sm);
+}
+
+/* Solar Experiments Container */
+.solar-experiments-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.experiments-intro h2 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+}
+
+.experiments-intro p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  margin: 0;
+  max-width: 740px;
+  line-height: 1.6;
+}
+
+.experiments-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.25rem;
+}
+
+.experiment-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 1.35rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transition: border-color var(--transition-fast);
+}
+
+.experiment-card.active {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 1px var(--accent-color);
+}
+
+.exp-card-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.exp-tag {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  color: var(--accent-color);
+}
+
+.experiment-card h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.exp-desc {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0;
+  flex: 1;
+}
+
+.exp-btn {
+  margin-top: 0.5rem;
+  width: 100%;
+}
+
+/* Custom Body Form Section */
+.custom-body-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.custom-body-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.form-group label {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.input-text {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  padding: 0.5rem 0.65rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+}
+
+.input-hint {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.checkbox-group {
+  justify-content: center;
+}
+
+.form-actions-row {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.custom-bodies-list {
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.custom-bodies-list h4 {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.custom-pills-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.custom-body-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  padding: 0.35rem 0.65rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+}
+
+.remove-pill-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0 0.2rem;
+}
+
+.remove-pill-btn:hover {
+  color: #ef4444;
+}
+
+/* Solar Theory View */
+.solar-theory-view {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.theory-header {
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 1.25rem;
+}
+
+.theory-header h2 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+}
+
+.theory-header p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  margin: 0;
+  max-width: 720px;
+  line-height: 1.6;
+}
+
+.theory-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.25rem;
+}
+
+.theory-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 1.35rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.box-badge {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  color: var(--accent-color);
+}
+
+.theory-box h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.theory-box p {
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.formula-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--accent-color);
+  text-align: center;
+  margin: 0.4rem 0;
+}
+
+.box-subtext {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* Responsive Breakpoints */
+@media (min-width: 1440px) {
+  .solar-3d-viewport {
+    height: 800px;
+    min-height: 780px;
+  }
+}
+
+@media (max-width: 1280px) {
+  .solar-grid {
+    grid-template-columns: minmax(0, 1fr) 320px;
+  }
+  .solar-3d-viewport {
+    height: clamp(650px, 72vh, 750px);
+    min-height: 650px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .solar-grid {
+    grid-template-columns: 1fr;
+  }
+  .solar-3d-viewport {
+    height: clamp(550px, 62vh, 650px);
+    min-height: 550px;
+  }
+  .planet-hud-card {
+    width: calc(100% - 2rem);
+    max-width: 320px;
+  }
+}
+
+@media (max-width: 640px) {
+  .solar-3d-viewport {
+    height: clamp(450px, 55vh, 550px);
+    min-height: 450px;
+  }
+  .solar-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .toolbar-group {
+    width: 100%;
+  }
+  .action-button-row {
+    grid-template-columns: 1fr;
+  }
+  .viewport-overlay-controls {
+    flex-direction: column;
+    align-items: flex-end;
+  }
+  .planet-hud-card {
+    top: auto;
+    bottom: 3.5rem;
+    left: 0.75rem;
+    width: calc(100% - 1.5rem);
+  }
+}

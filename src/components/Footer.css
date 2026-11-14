@@ -1,8 +1,7 @@
 .footer {
-  margin-top: 5rem;
   border-top: 1px solid var(--border-subtle);
-  background: var(--bg-glass);
-  padding: 3rem 1.5rem 2rem;
+  background: var(--bg-secondary);
+  padding: 2.5rem 1.5rem 2rem;
   color: var(--text-secondary);
   transition: background-color var(--transition-normal);
 }
@@ -12,39 +11,22 @@
   margin: 0 auto;
 }
 
-.footer-main {
+.footer-content {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   flex-wrap: wrap;
-  gap: 2rem;
-  padding-bottom: 2rem;
+  gap: 1.5rem;
+  padding-bottom: 1.5rem;
   border-bottom: 1px solid var(--border-subtle);
 }
 
 .footer-brand {
-  display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-  max-width: 480px;
-}
-
-.brand-logo-small {
-  width: 36px;
-  height: 36px;
-  border-radius: var(--radius-md);
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-subtle);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.footer-title {
-  font-size: 1.05rem;
+  font-family: var(--font-heading);
+  font-size: 1rem;
   font-weight: 700;
   color: var(--text-primary);
+  display: block;
   margin-bottom: 0.35rem;
 }
 
@@ -52,47 +34,17 @@
   font-size: 0.85rem;
   line-height: 1.5;
   color: var(--text-muted);
+  max-width: 480px;
 }
 
-.footer-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.tech-tag {
+.footer-tech {
+  font-size: 0.8rem;
+  color: var(--text-muted);
   font-family: var(--font-mono);
-  font-size: 0.72rem;
-  padding: 0.3rem 0.65rem;
-  border-radius: var(--radius-sm);
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-subtle);
-  color: var(--text-secondary);
 }
 
 .footer-bottom {
-  padding-top: 1.75rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  padding-top: 1.25rem;
   font-size: 0.8rem;
   color: var(--text-muted);
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.status-indicator {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  color: var(--accent-emerald);
-  font-size: 0.75rem;
-  font-weight: 500;
-}
-
-.status-ping {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--accent-emerald);
 }

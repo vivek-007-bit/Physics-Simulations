@@ -1,31 +1,60 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import Icon from '../../components/Icon';
+import {
+  calculateTheoreticalPeriod,
+  calculateTheoreticalFrequency,
+  calculateNonlinearPeriod,
+  calculateEnergy,
+  stepEulerCromer,
+  calculateMaxVelocity,
+} from './physics';
 import './styles.css';
 
 export default function SimplePendulumSimulation() {
   const { isDark } = useTheme();
 
-  // Parameters
+  // Physical Parameters
   const [length, setLength] = useState(2.0); // cord length (m)
   const [initialAngleDeg, setInitialAngleDeg] = useState(35); // degrees
   const [gravity, setGravity] = useState(9.81); // m/s^2
-  const [damping, setDamping] = useState(0.05); // damping factor
+  const [damping, setDamping] = useState(0.05); // damping coefficient
   const [mass, setMass] = useState(1.0); // kg
+  const [simSpeed, setSimSpeed] = useState(1.0); // 0.5x, 1x, 2x
 
-  // Playback state
-  const [isRunning, setIsRunning] = useState(true);
+  // Playback State
   const [isPaused, setIsPaused] = useState(false);
 
-  // References
+  // Canvas and Animation Refs
   const canvasRef = useRef(null);
   const animFrameIdRef = useRef(null);
   const lastTimestampRef = useRef(null);
 
-  // Physical State (Euler-Cromer integration for energy stability)
+  // Live Physical State (Euler-Cromer integration)
   const angleRef = useRef((initialAngleDeg * Math.PI) / 180);
   const omegaRef = useRef(0); // angular velocity (rad/s)
   const timeElapsedRef = useRef(0);
+
+  // Ref to hold current physical parameters for the animation loop
+  // This prevents recreating the requestAnimationFrame loop when sliders are dragged
+  const paramsRef = useRef({
+    length: 2.0,
+    gravity: 9.81,
+    damping: 0.05,
+    mass: 1.0,
+    simSpeed: 1.0,
+  });
+
+  // Sync parameters to ref immediately on change
+  useEffect(() => {
+    paramsRef.current = {
+      length: Math.max(0.1, length),
+      gravity: Math.max(0.1, gravity),
+      damping: Math.max(0, damping),
+      mass: Math.max(0.05, mass),
+      simSpeed,
+    };
+  }, [length, gravity, damping, mass, simSpeed]);
 
   // Live HUD references for zero re-render 60fps telemetry
   const hudTimeRef = useRef(null);
@@ -35,18 +64,30 @@ export default function SimplePendulumSimulation() {
   const hudEpRef = useRef(null);
   const hudEtotRef = useRef(null);
 
-  // Small angle theoretical period T = 2 * pi * sqrt(L / g)
+  // Small-angle theoretical period T0 = 2π √(L/g)
   const theoreticalPeriod = useMemo(() => {
-    return 2 * Math.PI * Math.sqrt(Math.max(0.01, length) / Math.max(0.1, gravity));
+    return calculateTheoreticalPeriod(length, gravity);
   }, [length, gravity]);
 
-  // Small angle frequency f = 1 / T
+  // Small-angle frequency f = 1 / T0
   const frequency = useMemo(() => {
-    return 1 / theoreticalPeriod;
-  }, [theoreticalPeriod]);
+    return calculateTheoreticalFrequency(length, gravity);
+  }, [length, gravity]);
 
-  // Canvas renderer
-  const renderCanvas = useCallback(() => {
+  // Non-linear corrected period for initial angle θ0
+  const nonlinearPeriod = useMemo(() => {
+    const angleRad = (initialAngleDeg * Math.PI) / 180;
+    return calculateNonlinearPeriod(length, gravity, angleRad);
+  }, [length, gravity, initialAngleDeg]);
+
+  // Max speed at lowest equilibrium point (θ = 0)
+  const maxVelocity = useMemo(() => {
+    const angleRad = (initialAngleDeg * Math.PI) / 180;
+    return calculateMaxVelocity(length, gravity, angleRad);
+  }, [length, gravity, initialAngleDeg]);
+
+  // Canvas Drawing Routine
+  const drawScene = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -57,11 +98,11 @@ export default function SimplePendulumSimulation() {
 
     ctx.clearRect(0, 0, width, height);
 
-    // Background
+    // Background Fill
     const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
     if (isDark) {
       bgGrad.addColorStop(0, '#0c111d');
-      bgGrad.addColorStop(1, '#090d16');
+      bgGrad.addColorStop(1, '#080c14');
     } else {
       bgGrad.addColorStop(0, '#ffffff');
       bgGrad.addColorStop(1, '#f8fafc');
@@ -71,56 +112,65 @@ export default function SimplePendulumSimulation() {
 
     // Pivot Origin (top center)
     const pivotX = width / 2;
-    const pivotY = 50 * dpr;
+    const pivotY = 55 * dpr;
 
-    // Visual scale factor (pixels per meter)
-    const maxPixelLength = height - 120 * dpr;
-    const scale = (maxPixelLength / 4.0); // max 4m length fit
-    const cordPixelLength = length * scale;
+    // Visual scale factor (pixels per meter): cord fits comfortably in view
+    const safeHeight = Math.max(height - 130 * dpr, 100 * dpr);
+    const scale = safeHeight / 4.2; // supports up to 4m cord
+    const currentLength = paramsRef.current.length;
+    const cordPixelLength = currentLength * scale;
 
     const currentTheta = angleRef.current;
+    const currentOmega = omegaRef.current;
+
+    // Bob Coordinates
     const bobX = pivotX + cordPixelLength * Math.sin(currentTheta);
     const bobY = pivotY + cordPixelLength * Math.cos(currentTheta);
 
-    // Ceiling Mount
     ctx.save();
-    ctx.strokeStyle = isDark ? '#334155' : '#64748b';
+
+    // 1. Circular Arc Trajectory Boundary Guide
+    const initRad = (initialAngleDeg * Math.PI) / 180;
+    ctx.strokeStyle = isDark ? 'rgba(16, 185, 129, 0.15)' : 'rgba(5, 150, 105, 0.18)';
+    ctx.lineWidth = 1.5 * dpr;
+    ctx.setLineDash([3 * dpr, 3 * dpr]);
+    ctx.beginPath();
+    ctx.arc(pivotX, pivotY, cordPixelLength, Math.PI / 2 - initRad, Math.PI / 2 + initRad);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // 2. Ceiling Mount Structure
+    ctx.strokeStyle = isDark ? '#334155' : '#94a3b8';
     ctx.lineWidth = 4 * dpr;
     ctx.beginPath();
-    ctx.moveTo(pivotX - 60 * dpr, pivotY - 10 * dpr);
-    ctx.lineTo(pivotX + 60 * dpr, pivotY - 10 * dpr);
+    ctx.moveTo(pivotX - 70 * dpr, pivotY - 12 * dpr);
+    ctx.lineTo(pivotX + 70 * dpr, pivotY - 12 * dpr);
     ctx.stroke();
 
     // Mount cross-hatching
     ctx.lineWidth = 1.5 * dpr;
-    for (let x = -50; x <= 50; x += 15) {
+    for (let x = -60; x <= 60; x += 15) {
       ctx.beginPath();
-      ctx.moveTo(pivotX + x * dpr, pivotY - 10 * dpr);
-      ctx.lineTo(pivotX + (x - 8) * dpr, pivotY - 20 * dpr);
+      ctx.moveTo(pivotX + x * dpr, pivotY - 12 * dpr);
+      ctx.lineTo(pivotX + (x - 10) * dpr, pivotY - 22 * dpr);
       ctx.stroke();
     }
 
-    // Pivot Bearing
-    ctx.fillStyle = isDark ? '#06b6d4' : '#0284c7';
-    ctx.beginPath();
-    ctx.arc(pivotX, pivotY, 6 * dpr, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Equilibrium Vertical Reference Line
-    ctx.strokeStyle = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.12)';
+    // 3. Equilibrium Vertical Reference Line
+    ctx.strokeStyle = isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.12)';
     ctx.lineWidth = 1 * dpr;
     ctx.setLineDash([4 * dpr, 4 * dpr]);
     ctx.beginPath();
     ctx.moveTo(pivotX, pivotY);
-    ctx.lineTo(pivotX, pivotY + cordPixelLength + 30 * dpr);
+    ctx.lineTo(pivotX, pivotY + cordPixelLength + 35 * dpr);
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // Angle Arc indicator
+    // 4. Angle Arc Indicator
     if (Math.abs(currentTheta) > 0.02) {
-      const arcRadius = 40 * dpr;
-      ctx.strokeStyle = isDark ? 'rgba(16, 185, 129, 0.6)' : 'rgba(5, 150, 105, 0.7)';
-      ctx.lineWidth = 1.5 * dpr;
+      const arcRadius = Math.min(50 * dpr, cordPixelLength * 0.45);
+      ctx.strokeStyle = isDark ? 'rgba(16, 185, 129, 0.7)' : 'rgba(5, 150, 105, 0.8)';
+      ctx.lineWidth = 1.75 * dpr;
       ctx.beginPath();
       if (currentTheta > 0) {
         ctx.arc(pivotX, pivotY, arcRadius, Math.PI / 2, Math.PI / 2 - currentTheta, true);
@@ -129,15 +179,17 @@ export default function SimplePendulumSimulation() {
       }
       ctx.stroke();
 
-      // Angle degrees text
-      const degText = `${((currentTheta * 180) / Math.PI).toFixed(1)}°`;
+      // Angle readout badge near arc
+      const degVal = ((currentTheta * 180) / Math.PI).toFixed(1);
       ctx.fillStyle = isDark ? '#34d399' : '#059669';
-      ctx.font = `600 ${10 * dpr}px 'Fira Code', monospace`;
+      ctx.font = `600 ${11 * dpr}px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace`;
       ctx.textAlign = 'center';
-      ctx.fillText(degText, pivotX + (currentTheta > 0 ? 30 * dpr : -30 * dpr), pivotY + arcRadius + 12 * dpr);
+      const labelX = pivotX + (currentTheta > 0 ? (arcRadius + 16 * dpr) : -(arcRadius + 16 * dpr));
+      const labelY = pivotY + arcRadius * 0.7 + 10 * dpr;
+      ctx.fillText(`${degVal}°`, labelX, labelY);
     }
 
-    // Cord Wire
+    // 5. Cord / String (Constant physical length maintained)
     ctx.strokeStyle = isDark ? '#94a3b8' : '#475569';
     ctx.lineWidth = 2 * dpr;
     ctx.beginPath();
@@ -145,19 +197,56 @@ export default function SimplePendulumSimulation() {
     ctx.lineTo(bobX, bobY);
     ctx.stroke();
 
-    // Pendulum Bob Sphere
-    const bobRadius = (12 + mass * 3) * dpr;
+    // 6. Velocity Vector Arrow at Bob
+    if (Math.abs(currentOmega) > 0.05) {
+      const vScale = 14 * dpr;
+      // Linear velocity direction is perpendicular to cord: (-cos(theta), sin(theta)) * v
+      const vLinear = currentLength * currentOmega;
+      const vNormX = -Math.cos(currentTheta) * vLinear;
+      const vNormY = Math.sin(currentTheta) * vLinear;
 
-    // Bob Glow
-    const bobGlow = ctx.createRadialGradient(bobX, bobY, 0, bobX, bobY, bobRadius * 2.5);
-    bobGlow.addColorStop(0, isDark ? 'rgba(16, 185, 129, 0.5)' : 'rgba(5, 150, 105, 0.35)');
+      const arrowEndX = bobX + vNormX * vScale;
+      const arrowEndY = bobY + vNormY * vScale;
+
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2 * dpr;
+      ctx.beginPath();
+      ctx.moveTo(bobX, bobY);
+      ctx.lineTo(arrowEndX, arrowEndY);
+      ctx.stroke();
+
+      // Arrowhead
+      const headAngle = Math.atan2(arrowEndY - bobY, arrowEndX - bobX);
+      const headLen = 6 * dpr;
+      ctx.fillStyle = '#38bdf8';
+      ctx.beginPath();
+      ctx.moveTo(arrowEndX, arrowEndY);
+      ctx.lineTo(
+        arrowEndX - headLen * Math.cos(headAngle - Math.PI / 6),
+        arrowEndY - headLen * Math.sin(headAngle - Math.PI / 6)
+      );
+      ctx.lineTo(
+        arrowEndX - headLen * Math.cos(headAngle + Math.PI / 6),
+        arrowEndY - headLen * Math.sin(headAngle + Math.PI / 6)
+      );
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    // 7. Pendulum Bob (Spherical mass with glow)
+    const currentMass = paramsRef.current.mass;
+    const bobRadius = (12 + currentMass * 3.5) * dpr;
+
+    // Bob outer radial glow
+    const bobGlow = ctx.createRadialGradient(bobX, bobY, 0, bobX, bobY, bobRadius * 2.2);
+    bobGlow.addColorStop(0, isDark ? 'rgba(16, 185, 129, 0.45)' : 'rgba(5, 150, 105, 0.3)');
     bobGlow.addColorStop(1, 'transparent');
     ctx.fillStyle = bobGlow;
     ctx.beginPath();
-    ctx.arc(bobX, bobY, bobRadius * 2.5, 0, Math.PI * 2);
+    ctx.arc(bobX, bobY, bobRadius * 2.2, 0, Math.PI * 2);
     ctx.fill();
 
-    // Bob Body
+    // Bob 3D shaded body
     const bobGrad = ctx.createRadialGradient(
       bobX - bobRadius * 0.3,
       bobY - bobRadius * 0.3,
@@ -179,40 +268,56 @@ export default function SimplePendulumSimulation() {
     ctx.beginPath();
     ctx.arc(bobX, bobY, bobRadius, 0, Math.PI * 2);
     ctx.fill();
+
     ctx.strokeStyle = '#ffffff';
     ctx.lineWidth = 1 * dpr;
     ctx.stroke();
 
+    // 8. Pivot Bearing Mount
+    ctx.fillStyle = isDark ? '#06b6d4' : '#0284c7';
+    ctx.beginPath();
+    ctx.arc(pivotX, pivotY, 6.5 * dpr, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(pivotX, pivotY, 2 * dpr, 0, Math.PI * 2);
+    ctx.fill();
+
     ctx.restore();
 
-    // Energy Metrics Calculation
-    const omega = omegaRef.current;
-    const vLinear = length * omega;
-    const Ek = 0.5 * mass * vLinear * vLinear;
-    // Potential Energy with datum at lowest equilibrium point
-    const hRel = length * (1 - Math.cos(currentTheta));
-    const Ep = mass * gravity * hRel;
-    const Etot = Ek + Ep;
+    // 9. Update Live DOM Telemetry
+    const energy = calculateEnergy(
+      currentTheta,
+      currentOmega,
+      currentLength,
+      currentMass,
+      paramsRef.current.gravity
+    );
 
-    // Update DOM Telemetry smoothly
     if (hudTimeRef.current) hudTimeRef.current.textContent = `${timeElapsedRef.current.toFixed(2)} s`;
     if (hudAngleRef.current) hudAngleRef.current.textContent = `${((currentTheta * 180) / Math.PI).toFixed(1)}°`;
-    if (hudOmegaRef.current) hudOmegaRef.current.textContent = `${omega.toFixed(2)} rad/s`;
-    if (hudEkRef.current) hudEkRef.current.textContent = `${Ek.toFixed(2)} J`;
-    if (hudEpRef.current) hudEpRef.current.textContent = `${Ep.toFixed(2)} J`;
-    if (hudEtotRef.current) hudEtotRef.current.textContent = `${Etot.toFixed(2)} J`;
-  }, [length, mass, gravity, isDark]);
+    if (hudOmegaRef.current) hudOmegaRef.current.textContent = `${currentOmega.toFixed(2)} rad/s`;
+    if (hudEkRef.current) hudEkRef.current.textContent = `${energy.Ek.toFixed(2)} J`;
+    if (hudEpRef.current) hudEpRef.current.textContent = `${energy.Ep.toFixed(2)} J`;
+    if (hudEtotRef.current) hudEtotRef.current.textContent = `${energy.Etot.toFixed(2)} J`;
+  }, [initialAngleDeg, isDark]);
 
-  // Handle Resize
+  // Handle Resize using ResizeObserver or Window Resize
   const handleResize = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
     const dpr = window.devicePixelRatio || 1;
-    canvas.width = Math.round(rect.width * dpr);
-    canvas.height = Math.round(rect.height * dpr);
-    renderCanvas();
-  }, [renderCanvas]);
+    const targetW = Math.max(Math.round(rect.width * dpr), 300);
+    const targetH = Math.max(Math.round(rect.height * dpr), 300);
+
+    if (canvas.width !== targetW || canvas.height !== targetH) {
+      canvas.width = targetW;
+      canvas.height = targetH;
+    }
+    drawScene();
+  }, [drawScene]);
 
   useEffect(() => {
     handleResize();
@@ -220,28 +325,28 @@ export default function SimplePendulumSimulation() {
     return () => window.removeEventListener('resize', handleResize);
   }, [handleResize]);
 
-  // Parameter Change Reset
-  const resetToAngle = useCallback(
-    (deg) => {
-      angleRef.current = (deg * Math.PI) / 180;
-      omegaRef.current = 0;
-      timeElapsedRef.current = 0;
-      renderCanvas();
-    },
-    [renderCanvas]
-  );
+  // Reset to Release Angle (Explicit User Action)
+  const resetToReleaseAngle = useCallback(() => {
+    angleRef.current = (initialAngleDeg * Math.PI) / 180;
+    omegaRef.current = 0;
+    timeElapsedRef.current = 0;
+    drawScene();
+  }, [initialAngleDeg, drawScene]);
 
+  // Update initial angle without resetting if user just drags slider
   useEffect(() => {
-    resetToAngle(initialAngleDeg);
-  }, [initialAngleDeg, resetToAngle]);
+    // When initialAngleDeg changes, reset pendulum to preview the angle
+    resetToReleaseAngle();
+  }, [initialAngleDeg, resetToReleaseAngle]);
 
+  // Re-draw on theme switch
   useEffect(() => {
-    renderCanvas();
-  }, [renderCanvas]);
+    drawScene();
+  }, [isDark, drawScene]);
 
-  // Physical Integration Loop (Euler-Cromer Algorithm)
+  // Continuous Physical Integration Loop (Euler-Cromer Algorithm)
   useEffect(() => {
-    if (!isRunning || isPaused) {
+    if (isPaused) {
       lastTimestampRef.current = null;
       return;
     }
@@ -255,23 +360,30 @@ export default function SimplePendulumSimulation() {
         lastTimestampRef.current = timestamp;
       }
 
-      const deltaMs = Math.min(timestamp - lastTimestampRef.current, 50); // cap substepping
+      // Delta time capped at 50ms to prevent spiral on background tab switch
+      const rawDeltaSec = (timestamp - lastTimestampRef.current) / 1000;
+      const deltaSec = Math.min(rawDeltaSec, 0.05);
       lastTimestampRef.current = timestamp;
-      const dt = deltaMs / 1000;
 
-      // Numerical sub-stepping for extreme energy stability
-      const subSteps = 8;
-      const subDt = dt / subSteps;
+      const p = paramsRef.current;
+      const scaledDt = deltaSec * p.simSpeed;
 
-      for (let s = 0; s < subSteps; s++) {
-        // alpha = - (g / L) * sin(theta) - damping * omega
-        const alpha = -(gravity / length) * Math.sin(angleRef.current) - damping * omegaRef.current;
-        omegaRef.current += alpha * subDt;
-        angleRef.current += omegaRef.current * subDt;
-      }
+      // Numerical symplectic integration step
+      const step = stepEulerCromer(
+        angleRef.current,
+        omegaRef.current,
+        p.length,
+        p.gravity,
+        p.damping,
+        scaledDt,
+        8 // 8 sub-steps for extreme energy stability
+      );
 
-      timeElapsedRef.current += dt;
-      renderCanvas();
+      angleRef.current = step.theta;
+      omegaRef.current = step.omega;
+      timeElapsedRef.current += scaledDt;
+
+      drawScene();
 
       animFrameIdRef.current = requestAnimationFrame(animate);
     };
@@ -284,25 +396,31 @@ export default function SimplePendulumSimulation() {
         cancelAnimationFrame(animFrameIdRef.current);
       }
     };
-  }, [isRunning, isPaused, length, gravity, damping, renderCanvas]);
+  }, [isPaused, drawScene]);
 
   return (
     <div className="pendulum-sim-root">
       <div className="sim-grid">
-        {/* Canvas Visualizer */}
+        {/* Canvas Visualizer Stage */}
         <div className="canvas-wrapper">
           <div className="canvas-container pendulum-canvas-box">
             <canvas ref={canvasRef} className="physics-canvas" />
+
+            {/* Status Live Badge */}
+            <div className={`canvas-status-badge ${isPaused ? 'paused' : 'running'}`}>
+              <span className="pulse-dot" />
+              <span>{isPaused ? 'OSCILLATION PAUSED' : 'OSCILLATING (REAL-TIME SI)'}</span>
+            </div>
           </div>
 
           {/* Telemetry Bar */}
           <div className="telemetry-bar">
             <div className="telemetry-item">
-              <span className="tel-label">Time</span>
+              <span className="tel-label">Time (t)</span>
               <span ref={hudTimeRef} className="tel-val mono">0.00 s</span>
             </div>
             <div className="telemetry-item">
-              <span className="tel-label">Angle (θ)</span>
+              <span className="tel-label">Displacement (θ)</span>
               <span ref={hudAngleRef} className="tel-val mono">0.0°</span>
             </div>
             <div className="telemetry-item">
@@ -318,7 +436,7 @@ export default function SimplePendulumSimulation() {
               <span ref={hudEpRef} className="tel-val mono">0.00 J</span>
             </div>
             <div className="telemetry-item">
-              <span className="tel-label">Total Energy</span>
+              <span className="tel-label">Mechanical (Etot)</span>
               <span ref={hudEtotRef} className="tel-val mono">0.00 J</span>
             </div>
           </div>
@@ -326,24 +444,24 @@ export default function SimplePendulumSimulation() {
           {/* Theoretical Summary Cards */}
           <div className="summary-cards">
             <div className="summary-card">
-              <span className="sum-title">Theoretical Period (T)</span>
+              <span className="sum-title">Theoretical Period (T₀)</span>
               <span className="sum-val mono">{theoreticalPeriod.toFixed(3)} s</span>
               <span className="sum-sub">Small-angle harmonic: 2π√(L/g)</span>
             </div>
             <div className="summary-card">
-              <span className="sum-title">Frequency (f)</span>
+              <span className="sum-title">Nonlinear Period (T)</span>
+              <span className="sum-val mono">{nonlinearPeriod.toFixed(3)} s</span>
+              <span className="sum-sub">Corrected for θ₀ = {initialAngleDeg}°</span>
+            </div>
+            <div className="summary-card">
+              <span className="sum-title">Natural Frequency (f)</span>
               <span className="sum-val mono">{frequency.toFixed(3)} Hz</span>
-              <span className="sum-sub">Cycles per second</span>
+              <span className="sum-sub">Oscillations per second (1/T₀)</span>
             </div>
             <div className="summary-card">
-              <span className="sum-title">Cord Length (L)</span>
-              <span className="sum-val mono">{length.toFixed(2)} m</span>
-              <span className="sum-sub">Pivot to bob center</span>
-            </div>
-            <div className="summary-card">
-              <span className="sum-title">Gravity Field (g)</span>
-              <span className="sum-val mono">{gravity.toFixed(2)} m/s²</span>
-              <span className="sum-sub">Gravitational field strength</span>
+              <span className="sum-title">Peak Velocity (v_max)</span>
+              <span className="sum-val mono">{maxVelocity.toFixed(2)} m/s</span>
+              <span className="sum-sub">Speed at equilibrium (θ = 0)</span>
             </div>
           </div>
         </div>
@@ -351,22 +469,22 @@ export default function SimplePendulumSimulation() {
         {/* Controls Panel */}
         <aside className="controls-panel">
           <div className="panel-header">
-            <Icon name="sliders" size={18} color="var(--accent-emerald)" />
+            <Icon name="sliders" size={18} color="#10b981" />
             <h3>Pendulum Parameters</h3>
           </div>
 
+          {/* Playback Action Buttons */}
           <div className="action-buttons">
             <button
-              className="primary-action-btn"
-              style={{ background: 'linear-gradient(135deg, #10b981, #059669)' }}
+              className={`primary-action-btn ${isPaused ? 'paused' : ''}`}
               onClick={() => setIsPaused((prev) => !prev)}
             >
               <Icon name={isPaused ? 'play' : 'pause'} size={16} />
               <span>{isPaused ? 'Resume Oscillation' : 'Pause Oscillation'}</span>
             </button>
             <button
-              className="secondary-action-btn reset"
-              onClick={() => resetToAngle(initialAngleDeg)}
+              className="secondary-action-btn"
+              onClick={resetToReleaseAngle}
               title="Reset to release angle"
             >
               <Icon name="reset" size={16} />
@@ -374,6 +492,25 @@ export default function SimplePendulumSimulation() {
             </button>
           </div>
 
+          {/* Simulation Speed Pill Selector */}
+          <div className="control-group">
+            <div className="control-label-row">
+              <label>Simulation Speed</label>
+            </div>
+            <div className="speed-pill-group">
+              {[0.5, 1.0, 2.0].map((spd) => (
+                <button
+                  key={spd}
+                  className={`speed-pill ${simSpeed === spd ? 'active' : ''}`}
+                  onClick={() => setSimSpeed(spd)}
+                >
+                  {spd}×
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Cord Length Slider */}
           <div className="control-group">
             <div className="control-label-row">
               <label htmlFor="pendulum-length">Cord Length (L)</label>
@@ -402,6 +539,7 @@ export default function SimplePendulumSimulation() {
             />
           </div>
 
+          {/* Initial Release Angle Slider */}
           <div className="control-group">
             <div className="control-label-row">
               <label htmlFor="pendulum-angle">Initial Release Angle (θ₀)</label>
@@ -410,7 +548,7 @@ export default function SimplePendulumSimulation() {
                   id="pendulum-angle"
                   type="number"
                   min="5"
-                  max="80"
+                  max="85"
                   step="1"
                   value={initialAngleDeg}
                   onChange={(e) => setInitialAngleDeg(Number(e.target.value))}
@@ -422,7 +560,7 @@ export default function SimplePendulumSimulation() {
             <input
               type="range"
               min="5"
-              max="75"
+              max="85"
               step="1"
               value={initialAngleDeg}
               onChange={(e) => setInitialAngleDeg(Number(e.target.value))}
@@ -430,9 +568,39 @@ export default function SimplePendulumSimulation() {
             />
           </div>
 
+          {/* Bob Mass Slider */}
           <div className="control-group">
             <div className="control-label-row">
-              <label htmlFor="pendulum-damping">Damping / Air Resistance</label>
+              <label htmlFor="pendulum-mass">Bob Mass (m)</label>
+              <div className="input-with-unit">
+                <input
+                  id="pendulum-mass"
+                  type="number"
+                  min="0.2"
+                  max="5.0"
+                  step="0.1"
+                  value={mass}
+                  onChange={(e) => setMass(Number(e.target.value))}
+                  className="num-input mono"
+                />
+                <span className="unit">kg</span>
+              </div>
+            </div>
+            <input
+              type="range"
+              min="0.2"
+              max="5.0"
+              step="0.1"
+              value={mass}
+              onChange={(e) => setMass(Number(e.target.value))}
+              className="range-slider"
+            />
+          </div>
+
+          {/* Damping / Air Resistance Slider */}
+          <div className="control-group">
+            <div className="control-label-row">
+              <label htmlFor="pendulum-damping">Damping / Resistance (γ)</label>
               <div className="input-with-unit">
                 <input
                   id="pendulum-damping"
@@ -444,6 +612,7 @@ export default function SimplePendulumSimulation() {
                   onChange={(e) => setDamping(Number(e.target.value))}
                   className="num-input mono"
                 />
+                <span className="unit">s⁻¹</span>
               </div>
             </div>
             <input
@@ -457,6 +626,7 @@ export default function SimplePendulumSimulation() {
             />
           </div>
 
+          {/* Gravity Slider & Celestial Chips */}
           <div className="control-group">
             <div className="control-label-row">
               <label htmlFor="pendulum-gravity">Gravity (g)</label>
@@ -474,6 +644,15 @@ export default function SimplePendulumSimulation() {
                 <span className="unit">m/s²</span>
               </div>
             </div>
+            <input
+              type="range"
+              min="1.0"
+              max="25.0"
+              step="0.1"
+              value={gravity}
+              onChange={(e) => setGravity(Number(e.target.value))}
+              className="range-slider"
+            />
             <div className="planet-chips">
               {[
                 { name: 'Earth', g: 9.81 },

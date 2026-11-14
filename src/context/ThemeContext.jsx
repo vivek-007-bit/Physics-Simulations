@@ -5,7 +5,7 @@ const ThemeContext = createContext();
 const THEME_STORAGE_KEY = 'physics_lab_theme';
 
 export function ThemeProvider({ children }) {
-  // First-time visitors default strictly to 'dark'
+  // First-time visitors default strictly to 'light'
   const [theme, setTheme] = useState(() => {
     try {
       const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
@@ -15,7 +15,7 @@ export function ThemeProvider({ children }) {
     } catch (e) {
       console.warn('Unable to access localStorage for theme preference:', e);
     }
-    return 'dark';
+    return 'light';
   });
 
   useEffect(() => {

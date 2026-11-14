@@ -10,17 +10,18 @@ export default function Home() {
 
   // Dynamically discovered simulations
   const allSimulations = useMemo(() => getAllSimulations(), []);
-  const categories = useMemo(() => getCategories(), []);
+  const discoveredCategories = useMemo(() => getCategories(), []);
 
-  // Filtered simulations based on category and search
+  // Filtered simulations based on category and search query
   const filteredSimulations = useMemo(() => {
     return allSimulations.filter((sim) => {
       const matchesCategory =
-        selectedCategory === 'All' || sim.category.toLowerCase() === selectedCategory.toLowerCase();
+        selectedCategory === 'All' ||
+        sim.category.toLowerCase() === selectedCategory.toLowerCase();
       const matchesSearch =
         sim.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         sim.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        sim.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+        (sim.tags && sim.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase())));
       return matchesCategory && matchesSearch;
     });
   }, [allSimulations, selectedCategory, searchQuery]);
@@ -29,68 +30,51 @@ export default function Home() {
     <div className="home-page">
       {/* Hero Section */}
       <section className="hero-section">
-        <div className="hero-glow"></div>
         <div className="hero-container">
-          <div className="hero-pill animate-fade-in">
-            <Icon name="sparkles" size={14} color="#06b6d4" />
-            <span>Interactive Virtual Laboratory</span>
-          </div>
-
-          <h1 className="hero-title animate-fade-in">
-            Explore Physics Concepts with <br />
-            <span className="hero-gradient-text">Real-Time Interactive Simulations</span>
-          </h1>
-
-          <p className="hero-description animate-fade-in">
-            Experiment with kinematics, gravitational dynamics, and Newtonian mechanics directly in your browser.
-            Adjust real physical parameters, visualize vector decomposition, and observe mathematical formulas come to life.
+          <p className="hero-overline">Physics Simulation Laboratory</p>
+          <h1 className="hero-title">Explore Physics Through Simulation</h1>
+          <p className="hero-description">
+            Experiment with physical systems, modify parameters, and observe how physical laws
+            influence their behaviour in real time. All calculations run locally in your browser.
           </p>
-
-          <div className="hero-stats animate-fade-in">
-            <div className="stat-card">
-              <span className="stat-value mono">{allSimulations.length}</span>
-              <span className="stat-label">Active Modules</span>
-            </div>
-            <div className="stat-divider"></div>
-            <div className="stat-card">
-              <span className="stat-value mono">60 FPS</span>
-              <span className="stat-label">Canvas Precision</span>
-            </div>
-            <div className="stat-divider"></div>
-            <div className="stat-card">
-              <span className="stat-value mono">100%</span>
-              <span className="stat-label">Client-Side Physics</span>
-            </div>
-          </div>
         </div>
       </section>
 
-      {/* Directory & Simulation Controls */}
-      <section className="directory-section" id="simulations-directory">
+      {/* Directory Controls & Simulation Cards */}
+      <section className="directory-section" id="simulations">
         <div className="directory-container">
-          <div className="directory-header">
-            <div>
-              <h2 className="section-title">Available Simulations</h2>
-              <p className="section-subtitle">
-                Select any module below to launch the dedicated physics workspace.
-              </p>
+          {/* Filter Bar & Search */}
+          <div className="directory-controls">
+            <div className="category-nav" role="tablist" aria-label="Simulation categories">
+              {discoveredCategories.map((cat) => (
+                <button
+                  key={cat}
+                  role="tab"
+                  aria-selected={selectedCategory === cat}
+                  className={`category-tab ${selectedCategory === cat ? 'active' : ''}`}
+                  onClick={() => setSelectedCategory(cat)}
+                >
+                  {cat}
+                </button>
+              ))}
             </div>
 
-            {/* Search Input */}
             <div className="search-box">
-              <Icon name="search" size={16} color="var(--text-muted)" />
+              <Icon name="search" size={15} color="var(--text-muted)" />
               <input
                 type="text"
-                placeholder="Search simulations, concepts, tags..."
+                placeholder="Search simulations..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="search-input"
+                aria-label="Search simulations"
               />
               {searchQuery && (
                 <button
                   className="clear-search-btn"
                   onClick={() => setSearchQuery('')}
                   title="Clear search"
+                  aria-label="Clear search"
                 >
                   ✕
                 </button>
@@ -98,23 +82,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Category Filter Pills */}
-          <div className="category-tabs">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                className={`category-tab ${selectedCategory === cat ? 'active' : ''}`}
-                onClick={() => setSelectedCategory(cat)}
-              >
-                {cat}
-                {cat === 'All' && (
-                  <span className="tab-count mono">{allSimulations.length}</span>
-                )}
-              </button>
-            ))}
-          </div>
-
-          {/* Dynamic Simulation Cards Grid */}
+          {/* Simulations Grid */}
           {filteredSimulations.length > 0 ? (
             <div className="simulations-grid">
               {filteredSimulations.map((simulation) => (
@@ -123,11 +91,8 @@ export default function Home() {
             </div>
           ) : (
             <div className="empty-state">
-              <div className="empty-icon">
-                <Icon name="info" size={32} color="var(--accent-cyan)" />
-              </div>
-              <h3>No simulations found</h3>
-              <p>No module matched your search query "{searchQuery}".</p>
+              <p className="empty-title">No simulations found</p>
+              <p className="empty-desc">No simulation matches "{searchQuery}".</p>
               <button
                 className="reset-filter-btn"
                 onClick={() => {
@@ -135,51 +100,53 @@ export default function Home() {
                   setSelectedCategory('All');
                 }}
               >
-                Reset Filters
+                Reset filters
               </button>
             </div>
           )}
         </div>
       </section>
 
-      {/* Laboratory Features / Architecture Section */}
-      <section className="features-section" id="theory">
-        <div className="features-container">
-          <div className="features-header">
-            <h2 className="section-title">Built for Discovery & Accuracy</h2>
+      {/* Educational Foundations & Theory Overview */}
+      <section className="theory-overview-section" id="theory">
+        <div className="theory-overview-container">
+          <div className="section-header">
+            <h2 className="section-title">Physical Models & Educational Foundations</h2>
             <p className="section-subtitle">
-              Engineered with SI dimensional accuracy, coordinate projection, and an extensible module architecture.
+              Computational principles and mathematical formulations used across our simulations.
             </p>
           </div>
 
-          <div className="features-grid">
-            <div className="feature-card">
-              <div className="feature-icon" style={{ background: 'rgba(6, 182, 212, 0.1)', color: '#06b6d4' }}>
-                <Icon name="gauge" size={24} />
-              </div>
-              <h3 className="feature-title">SI Unit Precision</h3>
-              <p className="feature-desc">
-                Calculations are executed strictly in physical dimensions (meters, seconds, m/s²) and dynamically projected onto canvas coordinates with automatic zoom and aspect scaling.
+          <div className="theory-topics-grid">
+            <div className="theory-topic-card">
+              <h3 className="theory-topic-title">Kinematics & Ballistics</h3>
+              <p className="theory-topic-text">
+                Parametric equations of motion with orthogonal vector decomposition. Analytical solutions
+                for trajectory parabolic arcs, maximum apogee, time-of-flight quadratics, and impact velocities.
               </p>
             </div>
 
-            <div className="feature-card">
-              <div className="feature-icon" style={{ background: 'rgba(99, 102, 241, 0.1)', color: '#6366f1' }}>
-                <Icon name="zap" size={24} />
-              </div>
-              <h3 className="feature-title">Zero-Backend Architecture</h3>
-              <p className="feature-desc">
-                Runs 100% locally in the browser with high-efficiency requestAnimationFrame timing. No network latency, no server dependencies, completely static deployment.
+            <div className="theory-topic-card">
+              <h3 className="theory-topic-title">Newtonian Gravitation</h3>
+              <p className="theory-topic-text">
+                Newton's universal law of gravitation (F = G · m₁m₂ / r²). Orbital velocity,
+                Kepler's laws, elliptical trajectories, and symplectic Velocity Verlet integration for planetary systems.
               </p>
             </div>
 
-            <div className="feature-card">
-              <div className="feature-icon" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981' }}>
-                <Icon name="layers" size={24} />
-              </div>
-              <h3 className="feature-title">Automatic Module Discovery</h3>
-              <p className="feature-desc">
-                New simulations are discovered automatically via Vite's dynamic import scanner. Adding a new physics module requires zero edits to the central router or landing page.
+            <div className="theory-topic-card">
+              <h3 className="theory-topic-title">Harmonic Oscillations</h3>
+              <p className="theory-topic-text">
+                Simple harmonic motion, restoring forces, and damping. Exchange between kinetic and gravitational
+                potential energy with numerical integration for large-angle non-linear pendulums.
+              </p>
+            </div>
+
+            <div className="theory-topic-card">
+              <h3 className="theory-topic-title">General Relativity & Spacetime Curvature</h3>
+              <p className="theory-topic-text">
+                Schwarzschild geometry, event horizons (r_s = 2GM/c²), and photon spheres (1.5 r_s).
+                Gravitational time dilation, relativistic light deflection, and 3D Flamm embedding curvature.
               </p>
             </div>
           </div>

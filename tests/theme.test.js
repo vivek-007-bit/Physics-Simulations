@@ -15,8 +15,8 @@ console.log('--- Testing Theme Architecture ---');
 const cssPath = path.resolve('src/styles/variables.css');
 const cssContent = fs.readFileSync(cssPath, 'utf-8');
 
-assert(cssContent.includes(':root, [data-theme="dark"]'), 'Dark theme selector is defined as baseline default');
-assert(cssContent.includes('[data-theme="light"]'), 'Light theme selector is defined');
+assert(cssContent.includes(':root, [data-theme="light"]'), 'Light theme selector is defined as baseline default');
+assert(cssContent.includes('[data-theme="dark"]'), 'Dark theme selector is defined');
 
 // Verify critical CSS variable tokens exist in both
 const requiredTokens = [
@@ -49,7 +49,7 @@ for (const token of requiredTokens) {
 const contextPath = path.resolve('src/context/ThemeContext.jsx');
 const contextContent = fs.readFileSync(contextPath, 'utf-8');
 
-assert(contextContent.includes("'dark'"), "ThemeContext defaults to 'dark'");
+assert(contextContent.includes("'light'"), "ThemeContext defaults to 'light'");
 assert(contextContent.includes('localStorage.getItem'), 'ThemeContext loads stored preference from localStorage');
 assert(contextContent.includes('localStorage.setItem'), 'ThemeContext saves selected preference to localStorage');
 assert(contextContent.includes('document.documentElement.setAttribute(\'data-theme\', theme)'), 'ThemeContext dynamically updates data-theme attribute on document root');

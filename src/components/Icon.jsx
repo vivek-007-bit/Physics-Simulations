@@ -48,6 +48,17 @@ export default function Icon({ name, size = 18, color = 'currentColor', classNam
           <ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(120 12 12)" />
         </svg>
       );
+    case 'black-hole':
+      return (
+        <svg {...iconProps}>
+          {/* Lensed accretion disk ring */}
+          <ellipse cx="12" cy="12" rx="10" ry="4.5" stroke={color} strokeWidth="1.5" transform="rotate(-15 12 12)" />
+          {/* Event horizon dark interior */}
+          <circle cx="12" cy="12" r="5" fill="#0f172a" stroke={color} strokeWidth="1.75" />
+          {/* Photon sphere glow ring */}
+          <circle cx="12" cy="12" r="7.5" stroke={color} strokeWidth="0.8" strokeDasharray="2 2" opacity="0.75" />
+        </svg>
+      );
     case 'play':
       return (
         <svg {...iconProps} fill={color}>
@@ -81,6 +92,35 @@ export default function Icon({ name, size = 18, color = 'currentColor', classNam
         <svg {...iconProps}>
           <line x1="19" y1="12" x2="5" y2="12" />
           <polyline points="12 19 5 12 12 5" />
+        </svg>
+      );
+    case 'arrow-right':
+      return (
+        <svg {...iconProps}>
+          <line x1="5" y1="12" x2="19" y2="12" />
+          <polyline points="12 5 19 12 12 19" />
+        </svg>
+      );
+    case 'arrow-up':
+      return (
+        <svg {...iconProps}>
+          <line x1="12" y1="19" x2="12" y2="5" />
+          <polyline points="5 12 12 5 19 12" />
+        </svg>
+      );
+    case 'arrow-down':
+      return (
+        <svg {...iconProps}>
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <polyline points="19 12 12 19 5 12" />
+        </svg>
+      );
+    case 'x':
+    case 'close':
+      return (
+        <svg {...iconProps}>
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
         </svg>
       );
     case 'sliders':
