@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { useTheme } from '../../context/ThemeContext';
 import {
   calculateAnalyticalTrajectory,
   calculateInstantaneousState,
@@ -59,8 +58,6 @@ const PLANETS = [
 ];
 
 export default function ProjectileMotionSimulation() {
-  const { isDark } = useTheme();
-
   // Primary Physics Parameters
   const [v0, setV0] = useState(50);
   const [angle, setAngle] = useState(45);
@@ -155,23 +152,19 @@ export default function ProjectileMotionSimulation() {
       ctx.clearRect(0, 0, width, height);
 
       // Background Gradient
+      // Background Gradient (Permanent Light Theme)
       const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
-      if (isDark) {
-        bgGrad.addColorStop(0, '#0c111d');
-        bgGrad.addColorStop(1, '#090d16');
-      } else {
-        bgGrad.addColorStop(0, '#ffffff');
-        bgGrad.addColorStop(1, '#f8fafc');
-      }
+      bgGrad.addColorStop(0, '#ffffff');
+      bgGrad.addColorStop(1, '#f8fafc');
       ctx.fillStyle = bgGrad;
       ctx.fillRect(0, 0, width, height);
 
       // 1. Draw Grid Lines & Markings
       if (showGrid) {
         ctx.save();
-        ctx.strokeStyle = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.06)';
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.06)';
         ctx.lineWidth = 1 * dpr;
-        ctx.fillStyle = isDark ? 'rgba(148, 163, 184, 0.6)' : '#64748b';
+        ctx.fillStyle = '#64748b';
         ctx.font = `${10 * dpr}px 'Fira Code', monospace`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
@@ -218,7 +211,7 @@ export default function ProjectileMotionSimulation() {
       ctx.save();
       // Ground plane
       const groundY = toScreenY(0);
-      ctx.strokeStyle = isDark ? '#334155' : '#94a3b8';
+      ctx.strokeStyle = '#94a3b8';
       ctx.lineWidth = 2 * dpr;
       ctx.beginPath();
       ctx.moveTo(0, groundY);
@@ -226,11 +219,11 @@ export default function ProjectileMotionSimulation() {
       ctx.stroke();
 
       // Ground Fill
-      ctx.fillStyle = isDark ? '#0f172a' : '#e2e8f0';
+      ctx.fillStyle = '#e2e8f0';
       ctx.fillRect(0, groundY, width, height - groundY);
 
       // Ground Surface Glow Line
-      ctx.strokeStyle = isDark ? 'rgba(6, 182, 212, 0.25)' : 'rgba(2, 132, 199, 0.35)';
+      ctx.strokeStyle = 'rgba(2, 132, 199, 0.35)';
       ctx.lineWidth = 1 * dpr;
       ctx.beginPath();
       ctx.moveTo(0, groundY);
@@ -244,16 +237,16 @@ export default function ProjectileMotionSimulation() {
         const cliffLeft = padLeft - cliffWidth;
 
         // Cliff body
-        ctx.fillStyle = isDark ? '#1e293b' : '#f1f5f9';
+        ctx.fillStyle = '#f1f5f9';
         ctx.fillRect(cliffLeft, cliffTop, cliffWidth, groundY - cliffTop);
 
         // Cliff border
-        ctx.strokeStyle = isDark ? '#475569' : '#94a3b8';
+        ctx.strokeStyle = '#94a3b8';
         ctx.lineWidth = 1.5 * dpr;
         ctx.strokeRect(cliffLeft, cliffTop, cliffWidth, groundY - cliffTop);
 
         // Platform top glow
-        ctx.strokeStyle = isDark ? '#06b6d4' : '#0284c7';
+        ctx.strokeStyle = '#0284c7';
         ctx.lineWidth = 2 * dpr;
         ctx.beginPath();
         ctx.moveTo(cliffLeft, cliffTop);
@@ -261,7 +254,7 @@ export default function ProjectileMotionSimulation() {
         ctx.stroke();
 
         // Elevation dimension line
-        ctx.strokeStyle = isDark ? 'rgba(245, 158, 11, 0.6)' : 'rgba(217, 119, 6, 0.7)';
+        ctx.strokeStyle = 'rgba(217, 119, 6, 0.7)';
         ctx.lineWidth = 1 * dpr;
         ctx.setLineDash([3 * dpr, 3 * dpr]);
         ctx.beginPath();
@@ -270,7 +263,7 @@ export default function ProjectileMotionSimulation() {
         ctx.stroke();
         ctx.setLineDash([]);
 
-        ctx.fillStyle = isDark ? '#f59e0b' : '#d97706';
+        ctx.fillStyle = '#d97706';
         ctx.font = `${10 * dpr}px 'Fira Code', monospace`;
         ctx.textAlign = 'right';
         ctx.textBaseline = 'middle';
@@ -289,8 +282,8 @@ export default function ProjectileMotionSimulation() {
       ctx.rotate(barrelAngleRad);
 
       // Barrel tube
-      ctx.fillStyle = isDark ? '#475569' : '#334155';
-      ctx.strokeStyle = isDark ? '#94a3b8' : '#1e293b';
+      ctx.fillStyle = '#334155';
+      ctx.strokeStyle = '#1e293b';
       ctx.lineWidth = 1.5 * dpr;
       ctx.beginPath();
       ctx.roundRect(0, -5 * dpr, barrelLen, 10 * dpr, 2 * dpr);
@@ -298,23 +291,23 @@ export default function ProjectileMotionSimulation() {
       ctx.stroke();
 
       // Barrel muzzle ring
-      ctx.fillStyle = isDark ? '#06b6d4' : '#0284c7';
+      ctx.fillStyle = '#0284c7';
       ctx.fillRect(barrelLen - 3 * dpr, -6 * dpr, 3 * dpr, 12 * dpr);
       ctx.restore();
 
       // Launcher Pivot Base
       ctx.save();
-      ctx.fillStyle = isDark ? '#334155' : '#475569';
+      ctx.fillStyle = '#475569';
       ctx.beginPath();
       ctx.arc(originX, originY, 8 * dpr, 0, Math.PI * 2);
       ctx.fill();
-      ctx.strokeStyle = isDark ? '#06b6d4' : '#0284c7';
+      ctx.strokeStyle = '#0284c7';
       ctx.lineWidth = 2 * dpr;
       ctx.stroke();
 
       // Angle indicator arc
       if (angle > 0) {
-        ctx.strokeStyle = isDark ? 'rgba(6, 182, 212, 0.5)' : 'rgba(2, 132, 199, 0.6)';
+        ctx.strokeStyle = 'rgba(2, 132, 199, 0.6)';
         ctx.lineWidth = 1.5 * dpr;
         ctx.setLineDash([2 * dpr, 2 * dpr]);
         ctx.beginPath();
@@ -326,7 +319,7 @@ export default function ProjectileMotionSimulation() {
         const midAngle = -analytical.theta / 2;
         const textX = originX + Math.cos(midAngle) * 44 * dpr;
         const textY = originY + Math.sin(midAngle) * 44 * dpr;
-        ctx.fillStyle = isDark ? '#38bdf8' : '#0284c7';
+        ctx.fillStyle = '#0284c7';
         ctx.font = `bold ${10 * dpr}px 'Fira Code', monospace`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
@@ -337,7 +330,7 @@ export default function ProjectileMotionSimulation() {
       // 4. Draw Full Theoretical Parabolic Path
       if (showTrajectory && trajectoryPoints.length > 1) {
         ctx.save();
-        ctx.strokeStyle = isDark ? 'rgba(99, 102, 241, 0.35)' : 'rgba(79, 70, 229, 0.55)';
+        ctx.strokeStyle = 'rgba(79, 70, 229, 0.55)';
         ctx.lineWidth = 2 * dpr;
         ctx.setLineDash([4 * dpr, 4 * dpr]);
         ctx.beginPath();
@@ -359,7 +352,7 @@ export default function ProjectileMotionSimulation() {
       const apexScreenY = toScreenY(analytical.yMax);
 
       // Apex vertical dashed line
-      ctx.strokeStyle = isDark ? 'rgba(168, 85, 247, 0.4)' : 'rgba(124, 58, 237, 0.45)';
+      ctx.strokeStyle = 'rgba(124, 58, 237, 0.45)';
       ctx.lineWidth = 1 * dpr;
       ctx.setLineDash([3 * dpr, 3 * dpr]);
       ctx.beginPath();
@@ -375,27 +368,27 @@ export default function ProjectileMotionSimulation() {
       ctx.setLineDash([]);
 
       // Apex marker node
-      ctx.fillStyle = isDark ? '#a855f7' : '#7c3aed';
+      ctx.fillStyle = '#7c3aed';
       ctx.beginPath();
       ctx.arc(apexScreenX, apexScreenY, 4 * dpr, 0, Math.PI * 2);
       ctx.fill();
 
       // Apex Badge
       ctx.font = `600 ${10 * dpr}px 'Inter', sans-serif`;
-      ctx.fillStyle = isDark ? '#c084fc' : '#7c3aed';
+      ctx.fillStyle = '#7c3aed';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'bottom';
       ctx.fillText(`H_max: ${analytical.yMax.toFixed(1)}m`, apexScreenX, apexScreenY - 6 * dpr);
 
       // Range Marker at landing point
       const landScreenX = toScreenX(analytical.range);
-      ctx.fillStyle = isDark ? '#10b981' : '#059669';
+      ctx.fillStyle = '#059669';
       ctx.beginPath();
       ctx.arc(landScreenX, groundY, 4 * dpr, 0, Math.PI * 2);
       ctx.fill();
 
       // Range measurement bracket along ground
-      ctx.strokeStyle = isDark ? 'rgba(16, 185, 129, 0.6)' : 'rgba(5, 150, 105, 0.7)';
+      ctx.strokeStyle = 'rgba(5, 150, 105, 0.7)';
       ctx.lineWidth = 1.5 * dpr;
       ctx.beginPath();
       ctx.moveTo(originX, groundY + 18 * dpr);
@@ -406,7 +399,7 @@ export default function ProjectileMotionSimulation() {
       ctx.lineTo(landScreenX, groundY + 24 * dpr);
       ctx.stroke();
 
-      ctx.fillStyle = isDark ? '#34d399' : '#059669';
+      ctx.fillStyle = '#059669';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
       ctx.fillText(`Range: ${analytical.range.toFixed(1)}m`, (originX + landScreenX) / 2, groundY + 26 * dpr);
@@ -424,7 +417,7 @@ export default function ProjectileMotionSimulation() {
           const p2 = trailRef.current[i];
           const alpha = (i / trailRef.current.length) * 0.7;
 
-          const trailColor = isDark ? 'rgba(6, 182, 212,' : 'rgba(2, 132, 199,';
+          const trailColor = 'rgba(2, 132, 199,';
           ctx.strokeStyle = `${trailColor} ${alpha})`;
           ctx.beginPath();
           ctx.moveTo(toScreenX(p1.x), toScreenY(p1.y));
@@ -440,54 +433,28 @@ export default function ProjectileMotionSimulation() {
       const ballRadius = 7 * dpr;
 
       ctx.save();
-      if (isDark) {
-        // Outer Glow (Dark Mode)
-        const glowGrad = ctx.createRadialGradient(projX, projY, 0, projX, projY, ballRadius * 3);
-        glowGrad.addColorStop(0, 'rgba(6, 182, 212, 0.6)');
-        glowGrad.addColorStop(0.5, 'rgba(99, 102, 241, 0.25)');
-        glowGrad.addColorStop(1, 'transparent');
-        ctx.fillStyle = glowGrad;
-        ctx.beginPath();
-        ctx.arc(projX, projY, ballRadius * 3, 0, Math.PI * 2);
-        ctx.fill();
+      // Outer Glow
+      const glowGrad = ctx.createRadialGradient(projX, projY, 0, projX, projY, ballRadius * 2.5);
+      glowGrad.addColorStop(0, 'rgba(2, 132, 199, 0.35)');
+      glowGrad.addColorStop(1, 'transparent');
+      ctx.fillStyle = glowGrad;
+      ctx.beginPath();
+      ctx.arc(projX, projY, ballRadius * 2.5, 0, Math.PI * 2);
+      ctx.fill();
 
-        // Ball Body (Dark Mode)
-        const ballGrad = ctx.createRadialGradient(
-          projX - ballRadius * 0.3,
-          projY - ballRadius * 0.3,
-          0,
-          projX,
-          projY,
-          ballRadius
-        );
-        ballGrad.addColorStop(0, '#e0f2fe');
-        ballGrad.addColorStop(0.5, '#38bdf8');
-        ballGrad.addColorStop(1, '#0284c7');
-        ctx.fillStyle = ballGrad;
-      } else {
-        // Outer Glow (Light Mode)
-        const glowGrad = ctx.createRadialGradient(projX, projY, 0, projX, projY, ballRadius * 2.5);
-        glowGrad.addColorStop(0, 'rgba(2, 132, 199, 0.35)');
-        glowGrad.addColorStop(1, 'transparent');
-        ctx.fillStyle = glowGrad;
-        ctx.beginPath();
-        ctx.arc(projX, projY, ballRadius * 2.5, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Ball Body (Light Mode)
-        const ballGrad = ctx.createRadialGradient(
-          projX - ballRadius * 0.3,
-          projY - ballRadius * 0.3,
-          0,
-          projX,
-          projY,
-          ballRadius
-        );
-        ballGrad.addColorStop(0, '#7dd3fc');
-        ballGrad.addColorStop(0.5, '#0284c7');
-        ballGrad.addColorStop(1, '#0369a1');
-        ctx.fillStyle = ballGrad;
-      }
+      // Ball Body
+      const ballGrad = ctx.createRadialGradient(
+        projX - ballRadius * 0.3,
+        projY - ballRadius * 0.3,
+        0,
+        projX,
+        projY,
+        ballRadius
+      );
+      ballGrad.addColorStop(0, '#7dd3fc');
+      ballGrad.addColorStop(0.5, '#0284c7');
+      ballGrad.addColorStop(1, '#0369a1');
+      ctx.fillStyle = ballGrad;
       ctx.beginPath();
       ctx.arc(projX, projY, ballRadius, 0, Math.PI * 2);
       ctx.fill();
@@ -505,10 +472,10 @@ export default function ProjectileMotionSimulation() {
         const vyPx = -state.vy * vScale; // invert Y for screen coords
 
         ctx.save();
-        const vColor = isDark ? '#38bdf8' : '#0284c7';
-        const vxColor = isDark ? '#10b981' : '#059669';
-        const vyColor = isDark ? '#f59e0b' : '#d97706';
-        const boxColor = isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.15)';
+        const vColor = '#0284c7';
+        const vxColor = '#059669';
+        const vyColor = '#d97706';
+        const boxColor = 'rgba(0, 0, 0, 0.15)';
 
         // Draw arrow function
         const drawArrow = (fromX, fromY, toX, toY, color, label) => {
@@ -563,7 +530,6 @@ export default function ProjectileMotionSimulation() {
       }
     },
     [
-      isDark,
       analytical,
       h0,
       angle,

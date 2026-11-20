@@ -1,17 +1,32 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useTheme } from '../context/ThemeContext';
 import Icon from './Icon';
 import './Navbar.css';
 
 export default function Navbar() {
   const location = useLocation();
-  const { toggleTheme, isDark } = useTheme();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
+
+  // Close on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setMobileMenuOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   return (
     <header className="navbar">
       <div className="navbar-container">
-        <Link to="/" className="navbar-brand">
+        <Link to="/" className="navbar-brand" onClick={() => setMobileMenuOpen(false)}>
           <div className="brand-logo">
             <Icon name="atom" size={20} color="var(--accent-indigo)" />
           </div>
@@ -20,7 +35,8 @@ export default function Navbar() {
           </span>
         </Link>
 
-        <nav className="navbar-nav">
+        {/* Desktop Navigation Links */}
+        <nav className="navbar-nav desktop-nav">
           <Link
             to="/"
             className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}
@@ -33,23 +49,40 @@ export default function Navbar() {
           >
             Theory
           </a>
-
-          {/* Theme Toggle Button */}
-          <button
-            className="theme-toggle-btn"
-            onClick={toggleTheme}
-            title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-            aria-label="Toggle theme"
-          >
-            <Icon
-              name={isDark ? 'moon' : 'sun'}
-              size={15}
-              color="currentColor"
-            />
-            <span className="theme-toggle-text">{isDark ? 'Dark' : 'Light'}</span>
-          </button>
         </nav>
+
+        {/* Mobile Menu Toggle Button */}
+        <button
+          className="mobile-menu-toggle"
+          onClick={() => setMobileMenuOpen((prev) => !prev)}
+          aria-expanded={mobileMenuOpen}
+          aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+        >
+          <Icon name={mobileMenuOpen ? 'x' : 'menu'} size={20} />
+        </button>
       </div>
+
+      {/* Mobile Dropdown Navigation */}
+      {mobileMenuOpen && (
+        <div className="mobile-nav-menu">
+          <Link
+            to="/"
+            className={`mobile-nav-link ${location.pathname === '/' ? 'active' : ''}`}
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <Icon name="atom" size={16} />
+            <span>Simulations</span>
+          </Link>
+          <a
+            href="/#theory"
+            className="mobile-nav-link"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <Icon name="book" size={16} />
+            <span>Theory</span>
+          </a>
+        </div>
+      )}
     </header>
   );
 }

@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
-import { useTheme } from '../../../context/ThemeContext';
 
 export default function SolarPhysicsGraphs({
   graphHistory, // array of { timeDays, distanceAU, speedKmS, forceN, kineticJ, potentialJ, totalEnergyJ }
   selectedPlanetName,
   isIsolatedTwoBody = false,
 }) {
-  const { isDark } = useTheme();
   const [selectedMetric, setSelectedMetric] = useState('distance'); // 'distance' | 'speed' | 'force' | 'energy'
 
   const metricsConfig = {
@@ -110,9 +108,9 @@ export default function SolarPhysicsGraphs({
     }, '');
   };
 
-  const axisColor = isDark ? '#475569' : '#cbd5e1';
-  const gridColor = isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.06)';
-  const textColor = isDark ? '#94a3b8' : '#64748b';
+  const axisColor = '#cbd5e1';
+  const gridColor = 'rgba(0, 0, 0, 0.06)';
+  const textColor = '#64748b';
 
   return (
     <div className="graph-container-card">

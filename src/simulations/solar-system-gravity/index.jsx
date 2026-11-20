@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { useTheme } from '../../context/ThemeContext';
 import { AU_METERS, DAY_SECONDS, SOLAR_SYSTEM_DATA } from './constants.js';
 import {
   initializeSolarSystem,
@@ -15,8 +14,6 @@ import SolarSystem3D from './SolarSystem3D.jsx';
 import './styles.css';
 
 export default function SolarSystemSimulation() {
-  const { isDark } = useTheme();
-
   // Active View Tabs
   // 'workspace' | 'experiments' | 'twobody' | 'graphs' | 'theory'
   const [activeTab, setActiveTab] = useState('workspace');
@@ -128,7 +125,7 @@ export default function SolarSystemSimulation() {
     ctx.clearRect(0, 0, width, height);
 
     // Theme Background
-    ctx.fillStyle = isDark ? '#0b0f19' : '#f8fafc';
+    ctx.fillStyle = '#f8fafc';
     ctx.fillRect(0, 0, width, height);
 
     // Base View & Scale
@@ -152,7 +149,7 @@ export default function SolarSystemSimulation() {
 
     // Coordinate Grid
     if (showCoordGrid) {
-      ctx.strokeStyle = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.05)';
       ctx.lineWidth = 1 * dpr;
       const gridSpacingAU = scaleMode === 'inner' ? 0.5 : 5.0;
       const gridSpacingPx = gridSpacingAU * pixelsPerAU;
@@ -181,7 +178,7 @@ export default function SolarSystemSimulation() {
         const ringPx = rAU * pixelsPerAU;
         ctx.beginPath();
         ctx.arc(centerX, centerY, ringPx, 0, Math.PI * 2);
-        ctx.strokeStyle = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)';
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.08)';
         ctx.lineWidth = 1 * dpr;
         ctx.setLineDash([4 * dpr, 4 * dpr]);
         ctx.stroke();
@@ -194,8 +191,8 @@ export default function SolarSystemSimulation() {
       for (const b of bodies) {
         if (!b.trail || b.trail.length < 2) continue;
         const trailColor = b.isSun
-          ? isDark ? 'rgba(245, 158, 11, 0.4)' : 'rgba(217, 119, 6, 0.4)'
-          : isDark ? b.color : b.colorLight || b.color;
+          ? 'rgba(217, 119, 6, 0.4)'
+          : b.colorLight || b.color;
 
         ctx.strokeStyle = trailColor;
         ctx.lineWidth = (b.id === selectedPlanetId ? 2 : 1) * dpr;
@@ -221,22 +218,22 @@ export default function SolarSystemSimulation() {
         const sunRadius = (scaleMode === 'inner' ? 18 : 12) * dpr;
         ctx.beginPath();
         ctx.arc(screenX, screenY, sunRadius * 1.6, 0, Math.PI * 2);
-        ctx.fillStyle = isDark ? 'rgba(245, 158, 11, 0.2)' : 'rgba(217, 119, 6, 0.15)';
+        ctx.fillStyle = 'rgba(217, 119, 6, 0.15)';
         ctx.fill();
 
         ctx.beginPath();
         ctx.arc(screenX, screenY, sunRadius, 0, Math.PI * 2);
-        ctx.fillStyle = isDark ? '#f59e0b' : '#d97706';
+        ctx.fillStyle = '#d97706';
         ctx.fill();
 
         if (showLabels) {
           ctx.font = `bold ${Math.max(10, Math.round(11 * dpr))}px system-ui, sans-serif`;
-          ctx.fillStyle = isDark ? '#fde047' : '#b45309';
+          ctx.fillStyle = '#b45309';
           ctx.textAlign = 'center';
           ctx.fillText('Sun', screenX, screenY + sunRadius + 14 * dpr);
         }
       } else {
-        const planetColor = isDark ? b.color : b.colorLight || b.color;
+        const planetColor = b.colorLight || b.color;
         let planetRadius = (b.displayRadius || 5) * dpr;
         if (scaleMode === 'inner') planetRadius *= 1.35;
 
@@ -254,7 +251,7 @@ export default function SolarSystemSimulation() {
           ctx.rotate(0.35);
           ctx.beginPath();
           ctx.ellipse(0, 0, planetRadius * 2.2, planetRadius * 0.75, 0, 0, Math.PI * 2);
-          ctx.strokeStyle = isDark ? 'rgba(202, 138, 4, 0.7)' : 'rgba(161, 98, 7, 0.7)';
+          ctx.strokeStyle = 'rgba(161, 98, 7, 0.7)';
           ctx.lineWidth = 2 * dpr;
           ctx.stroke();
           ctx.restore();
@@ -267,7 +264,7 @@ export default function SolarSystemSimulation() {
 
         if (showLabels) {
           ctx.font = `${Math.max(10, Math.round(10.5 * dpr))}px system-ui, sans-serif`;
-          ctx.fillStyle = isSelected ? (isDark ? '#38bdf8' : '#0284c7') : isDark ? '#cbd5e1' : '#334155';
+          ctx.fillStyle = isSelected ? '#0284c7' : '#334155';
           ctx.textAlign = 'center';
           ctx.fillText(b.name, screenX, screenY - planetRadius - 6 * dpr);
         }
@@ -318,7 +315,6 @@ export default function SolarSystemSimulation() {
     showLabels,
     showCoordGrid,
     vectorScale,
-    isDark,
   ]);
 
   // Update Telemetry Panel HUD
@@ -776,7 +772,6 @@ export default function SolarSystemSimulation() {
                 showLabels={showLabels}
                 showGrid={showCoordGrid}
                 vectorScale={vectorScale}
-                isDark={isDark}
                 metrics={selectedMetrics}
               />
             ) : (

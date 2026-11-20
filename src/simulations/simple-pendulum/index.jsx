@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { useTheme } from '../../context/ThemeContext';
 import Icon from '../../components/Icon';
 import {
   calculateTheoreticalPeriod,
@@ -12,8 +11,6 @@ import {
 import './styles.css';
 
 export default function SimplePendulumSimulation() {
-  const { isDark } = useTheme();
-
   // Physical Parameters
   const [length, setLength] = useState(2.0); // cord length (m)
   const [initialAngleDeg, setInitialAngleDeg] = useState(35); // degrees
@@ -100,13 +97,8 @@ export default function SimplePendulumSimulation() {
 
     // Background Fill
     const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
-    if (isDark) {
-      bgGrad.addColorStop(0, '#0c111d');
-      bgGrad.addColorStop(1, '#080c14');
-    } else {
-      bgGrad.addColorStop(0, '#ffffff');
-      bgGrad.addColorStop(1, '#f8fafc');
-    }
+    bgGrad.addColorStop(0, '#ffffff');
+    bgGrad.addColorStop(1, '#f8fafc');
     ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, width, height);
 
@@ -131,7 +123,7 @@ export default function SimplePendulumSimulation() {
 
     // 1. Circular Arc Trajectory Boundary Guide
     const initRad = (initialAngleDeg * Math.PI) / 180;
-    ctx.strokeStyle = isDark ? 'rgba(16, 185, 129, 0.15)' : 'rgba(5, 150, 105, 0.18)';
+    ctx.strokeStyle = 'rgba(5, 150, 105, 0.18)';
     ctx.lineWidth = 1.5 * dpr;
     ctx.setLineDash([3 * dpr, 3 * dpr]);
     ctx.beginPath();
@@ -140,7 +132,7 @@ export default function SimplePendulumSimulation() {
     ctx.setLineDash([]);
 
     // 2. Ceiling Mount Structure
-    ctx.strokeStyle = isDark ? '#334155' : '#94a3b8';
+    ctx.strokeStyle = '#94a3b8';
     ctx.lineWidth = 4 * dpr;
     ctx.beginPath();
     ctx.moveTo(pivotX - 70 * dpr, pivotY - 12 * dpr);
@@ -157,7 +149,7 @@ export default function SimplePendulumSimulation() {
     }
 
     // 3. Equilibrium Vertical Reference Line
-    ctx.strokeStyle = isDark ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.12)';
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.12)';
     ctx.lineWidth = 1 * dpr;
     ctx.setLineDash([4 * dpr, 4 * dpr]);
     ctx.beginPath();
@@ -169,7 +161,7 @@ export default function SimplePendulumSimulation() {
     // 4. Angle Arc Indicator
     if (Math.abs(currentTheta) > 0.02) {
       const arcRadius = Math.min(50 * dpr, cordPixelLength * 0.45);
-      ctx.strokeStyle = isDark ? 'rgba(16, 185, 129, 0.7)' : 'rgba(5, 150, 105, 0.8)';
+      ctx.strokeStyle = 'rgba(5, 150, 105, 0.8)';
       ctx.lineWidth = 1.75 * dpr;
       ctx.beginPath();
       if (currentTheta > 0) {
@@ -181,7 +173,7 @@ export default function SimplePendulumSimulation() {
 
       // Angle readout badge near arc
       const degVal = ((currentTheta * 180) / Math.PI).toFixed(1);
-      ctx.fillStyle = isDark ? '#34d399' : '#059669';
+      ctx.fillStyle = '#059669';
       ctx.font = `600 ${11 * dpr}px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace`;
       ctx.textAlign = 'center';
       const labelX = pivotX + (currentTheta > 0 ? (arcRadius + 16 * dpr) : -(arcRadius + 16 * dpr));
@@ -190,7 +182,7 @@ export default function SimplePendulumSimulation() {
     }
 
     // 5. Cord / String (Constant physical length maintained)
-    ctx.strokeStyle = isDark ? '#94a3b8' : '#475569';
+    ctx.strokeStyle = '#475569';
     ctx.lineWidth = 2 * dpr;
     ctx.beginPath();
     ctx.moveTo(pivotX, pivotY);
@@ -239,7 +231,7 @@ export default function SimplePendulumSimulation() {
 
     // Bob outer radial glow
     const bobGlow = ctx.createRadialGradient(bobX, bobY, 0, bobX, bobY, bobRadius * 2.2);
-    bobGlow.addColorStop(0, isDark ? 'rgba(16, 185, 129, 0.45)' : 'rgba(5, 150, 105, 0.3)');
+    bobGlow.addColorStop(0, 'rgba(5, 150, 105, 0.3)');
     bobGlow.addColorStop(1, 'transparent');
     ctx.fillStyle = bobGlow;
     ctx.beginPath();
@@ -255,15 +247,9 @@ export default function SimplePendulumSimulation() {
       bobY,
       bobRadius
     );
-    if (isDark) {
-      bobGrad.addColorStop(0, '#a7f3d0');
-      bobGrad.addColorStop(0.5, '#10b981');
-      bobGrad.addColorStop(1, '#047857');
-    } else {
-      bobGrad.addColorStop(0, '#6ee7b7');
-      bobGrad.addColorStop(0.5, '#059669');
-      bobGrad.addColorStop(1, '#065f46');
-    }
+    bobGrad.addColorStop(0, '#6ee7b7');
+    bobGrad.addColorStop(0.5, '#059669');
+    bobGrad.addColorStop(1, '#065f46');
     ctx.fillStyle = bobGrad;
     ctx.beginPath();
     ctx.arc(bobX, bobY, bobRadius, 0, Math.PI * 2);
@@ -274,7 +260,7 @@ export default function SimplePendulumSimulation() {
     ctx.stroke();
 
     // 8. Pivot Bearing Mount
-    ctx.fillStyle = isDark ? '#06b6d4' : '#0284c7';
+    ctx.fillStyle = '#0284c7';
     ctx.beginPath();
     ctx.arc(pivotX, pivotY, 6.5 * dpr, 0, Math.PI * 2);
     ctx.fill();
@@ -301,7 +287,7 @@ export default function SimplePendulumSimulation() {
     if (hudEkRef.current) hudEkRef.current.textContent = `${energy.Ek.toFixed(2)} J`;
     if (hudEpRef.current) hudEpRef.current.textContent = `${energy.Ep.toFixed(2)} J`;
     if (hudEtotRef.current) hudEtotRef.current.textContent = `${energy.Etot.toFixed(2)} J`;
-  }, [initialAngleDeg, isDark]);
+  }, [initialAngleDeg]);
 
   // Handle Resize using ResizeObserver or Window Resize
   const handleResize = useCallback(() => {
@@ -338,11 +324,6 @@ export default function SimplePendulumSimulation() {
     // When initialAngleDeg changes, reset pendulum to preview the angle
     resetToReleaseAngle();
   }, [initialAngleDeg, resetToReleaseAngle]);
-
-  // Re-draw on theme switch
-  useEffect(() => {
-    drawScene();
-  }, [isDark, drawScene]);
 
   // Continuous Physical Integration Loop (Euler-Cromer Algorithm)
   useEffect(() => {

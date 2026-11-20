@@ -106,18 +106,11 @@
   display: flex;
   align-items: center;
   gap: 0.3rem;
-  background: rgba(15, 23, 42, 0.82);
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(0, 0, 0, 0.12);
   border-radius: var(--radius-md);
   padding: 0.25rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-}
-
-[data-theme="light"] .view-mode-group,
-[data-theme="light"] .camera-tracking-group {
-  background: rgba(255, 255, 255, 0.92);
-  border-color: rgba(0, 0, 0, 0.12);
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
 }
 
@@ -128,7 +121,7 @@
   padding: 0.35rem 0.65rem;
   font-size: 0.78rem;
   font-weight: 500;
-  color: #cbd5e1;
+  color: #334155;
   background: transparent;
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
@@ -136,16 +129,7 @@
   transition: all var(--transition-fast);
 }
 
-[data-theme="light"] .view-btn {
-  color: #334155;
-}
-
 .view-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: #ffffff;
-}
-
-[data-theme="light"] .view-btn:hover {
   background: rgba(0, 0, 0, 0.06);
   color: #0f172a;
 }
@@ -173,20 +157,14 @@
   top: 1rem;
   left: 1rem;
   width: 290px;
-  background: rgba(15, 23, 42, 0.84);
+  background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(0, 0, 0, 0.12);
   border-radius: var(--radius-lg);
   padding: 0.85rem 1rem;
   z-index: 10;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
-  transition: all var(--transition-normal);
-}
-
-[data-theme="light"] .planet-hud-card {
-  background: rgba(255, 255, 255, 0.94);
-  border-color: rgba(0, 0, 0, 0.12);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: all var(--transition-normal);
 }
 
 .planet-hud-card.collapsed {
@@ -210,7 +188,7 @@
   height: 12px;
   border-radius: 50%;
   flex-shrink: 0;
-  box-shadow: 0 0 6px rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.15);
 }
 
 .hud-title-text {
@@ -222,20 +200,12 @@
   font-size: 0.98rem;
   font-weight: 700;
   margin: 0;
-  color: #f8fafc;
-  line-height: 1.2;
-}
-
-[data-theme="light"] .hud-planet-name {
   color: #0f172a;
+  line-height: 1.2;
 }
 
 .hud-planet-type {
   font-size: 0.72rem;
-  color: #94a3b8;
-}
-
-[data-theme="light"] .hud-planet-type {
   color: #64748b;
 }
 
@@ -252,11 +222,6 @@
 }
 
 .hud-collapse-btn:hover {
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.1);
-}
-
-[data-theme="light"] .hud-collapse-btn:hover {
   color: #0f172a;
   background: rgba(0, 0, 0, 0.06);
 }
@@ -267,11 +232,7 @@
   gap: 0.45rem;
   margin-top: 0.75rem;
   padding-top: 0.75rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-[data-theme="light"] .hud-metrics-grid {
-  border-top-color: rgba(0, 0, 0, 0.08);
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .hud-metric-item {
@@ -282,29 +243,17 @@
 }
 
 .hud-metric-label {
-  color: #94a3b8;
+  color: #64748b;
   font-weight: 500;
 }
 
-[data-theme="light"] .hud-metric-label {
-  color: #64748b;
-}
-
 .hud-metric-val {
-  color: #f1f5f9;
+  color: #0f172a;
   font-weight: 600;
   text-align: right;
 }
 
-[data-theme="light"] .hud-metric-val {
-  color: #0f172a;
-}
-
 .hud-metric-val.highlight {
-  color: #38bdf8;
-}
-
-[data-theme="light"] .hud-metric-val.highlight {
   color: #0284c7;
 }
 
@@ -330,11 +279,11 @@
   align-items: center;
   gap: 0.35rem;
   padding: 0.2rem 0.55rem;
-  background: rgba(15, 23, 42, 0.75);
+  background: rgba(255, 255, 255, 0.88);
   backdrop-filter: blur(4px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(0, 0, 0, 0.15);
   border-radius: 9999px;
-  color: #f1f5f9;
+  color: #1e293b;
   font-size: 0.72rem;
   font-weight: 600;
   pointer-events: auto;
@@ -344,25 +293,15 @@
   transition: transform var(--transition-fast), background-color var(--transition-fast);
 }
 
-[data-theme="light"] .projected-planet-label {
-  background: rgba(255, 255, 255, 0.88);
-  border-color: rgba(0, 0, 0, 0.15);
-  color: #1e293b;
-}
-
 .projected-planet-label:hover {
-  background: rgba(15, 23, 42, 0.95);
+  background: #ffffff;
   transform: scale(1.08);
 }
 
-[data-theme="light"] .projected-planet-label:hover {
-  background: #ffffff;
-}
-
 .projected-planet-label.selected {
-  border-color: #38bdf8;
-  background: rgba(2, 132, 199, 0.45);
-  box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+  border-color: #0284c7;
+  background: rgba(2, 132, 199, 0.15);
+  box-shadow: 0 0 12px rgba(2, 132, 199, 0.25);
 }
 
 .label-dot {
@@ -377,22 +316,16 @@
   bottom: 0.85rem;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(15, 23, 42, 0.75);
+  background: rgba(255, 255, 255, 0.88);
   backdrop-filter: blur(6px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #94a3b8;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  color: #475569;
   font-size: 0.73rem;
   padding: 0.35rem 0.95rem;
   border-radius: 9999px;
   pointer-events: none;
   white-space: nowrap;
   z-index: 10;
-}
-
-[data-theme="light"] .viewport-hint-pill {
-  background: rgba(255, 255, 255, 0.88);
-  border-color: rgba(0, 0, 0, 0.12);
-  color: #475569;
 }
 
 .scale-legend-info {
@@ -1244,7 +1177,7 @@
 
 .experiments-cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
   gap: 1.25rem;
 }
 
@@ -1317,7 +1250,7 @@
 
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr));
   gap: 1rem;
 }
 
@@ -1430,7 +1363,7 @@
 
 .theory-cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
   gap: 1.25rem;
 }
 
@@ -1517,8 +1450,8 @@
 
 @media (max-width: 640px) {
   .solar-3d-viewport {
-    height: clamp(450px, 55vh, 550px);
-    min-height: 450px;
+    height: clamp(380px, 50vh, 500px);
+    min-height: 380px;
   }
   .solar-toolbar {
     flex-direction: column;
@@ -1539,5 +1472,29 @@
     bottom: 3.5rem;
     left: 0.75rem;
     width: calc(100% - 1.5rem);
+  }
+  .experiments-cards-grid,
+  .theory-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 360px) {
+  .solar-telemetry-bar {
+    grid-template-columns: repeat(2, 1fr);
+    padding: 0.75rem 0.5rem;
+  }
+  .solar-controls {
+    padding: 1rem 0.75rem;
+  }
+  .view-mode-group,
+  .camera-tracking-group {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .planet-hud-card {
+    left: 0.5rem;
+    width: calc(100% - 1rem);
+    padding: 0.65rem 0.75rem;
   }
 }

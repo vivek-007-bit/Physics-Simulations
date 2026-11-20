@@ -41,7 +41,6 @@ export default function SolarSystem3D({
   showLabels = true,
   showGrid = true,
   vectorScale = 1.0,
-  isDark = true,
   metrics = null,
 }) {
   const containerRef = useRef(null);
@@ -112,7 +111,7 @@ export default function SolarSystem3D({
     // Scene
     const scene = new THREE.Scene();
     sceneRef.current = scene;
-    scene.background = new THREE.Color(isDark ? 0x030712 : 0x0a1128);
+    scene.background = new THREE.Color(0x0a1128);
 
     // Camera
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.5, 3500);
@@ -180,7 +179,7 @@ export default function SolarSystem3D({
       size: 1.6,
       vertexColors: true,
       transparent: true,
-      opacity: isDark ? 0.92 : 0.75,
+      opacity: 0.75,
       sizeAttenuation: false,
     });
     const starField = new THREE.Points(starGeometry, starMaterial);
@@ -227,7 +226,7 @@ export default function SolarSystem3D({
       selectRingGeo.dispose();
       selectRingMat.dispose();
     };
-  }, [isDark]);
+  }, []);
 
   // 2. Reference AU Orbit Rings
   useEffect(() => {
@@ -255,16 +254,16 @@ export default function SolarSystem3D({
 
       const ringGeometry = new THREE.BufferGeometry().setFromPoints(points);
       const ringMaterial = new THREE.LineBasicMaterial({
-        color: isDark ? 0x334155 : 0x475569,
+        color: 0x475569,
         transparent: true,
-        opacity: isDark ? 0.3 : 0.4,
+        opacity: 0.4,
         linewidth: 1,
       });
 
       const line = new THREE.Line(ringGeometry, ringMaterial);
       ringsGroup.add(line);
     });
-  }, [scaleMode, showGrid, isDark]);
+  }, [scaleMode, showGrid]);
 
   // 3. Create or Update 3D Meshes for Celestial Bodies
   useEffect(() => {
